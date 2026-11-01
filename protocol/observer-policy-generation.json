@@ -1,0 +1,17 @@
+{
+  "version": "observer-policy-analysis-v0.1",
+  "tool": "iam-policy-autopilot",
+  "tool_version": "0.3.0",
+  "account": "653464153304",
+  "region": "us-east-2",
+  "source_sha256": {
+    "research/sandbox_capture.py": "0f1d0f98ce94348e7ab540530bfb9d15971e25e5b26896857cfac92d9ba9289a",
+    "scripts/sandbox_capture_worker.py": "929f69b788599fbcffb5e7ae959d8e6ecef908c0e02a3ca1b5486a29d9e2eeca"
+  },
+  "terraform_context": "infra/sandbox",
+  "generated_policy_canonical_sha256": "89259f2ffc7969ee687f71d237b6723f7580a1fa0cb93599f139709cadfd3ca4",
+  "generated_policy_standalone_approved": false,
+  "mandatory_boundary": "infra/observer/main.tf",
+  "deployable_saved_plan": false,
+  "aws_applied": false
+}

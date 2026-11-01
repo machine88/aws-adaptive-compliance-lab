@@ -10,6 +10,7 @@ Terraform defines AWS Adaptive Compliance Lab's research foundation. The checked
 | `access/` | Bounded deployment roles, permissions boundaries and sandbox access |
 | `baseline/` | Telemetry S3, CloudTrail, AWS Config, Security Hub CSPM and budget notifications |
 | `reader/` | Scoped read-only evidence access |
+| `observer/` | Disabled-by-default sandbox observation role, generated baseline and mandatory boundary |
 | `sandbox/` | Dedicated private, encrypted, versioned development S3 bucket |
 
 Separate protected state keys isolate roots. Private backend settings and approved active inputs remain outside Git. The public GitHub name does not change deployed `dissertation-*` identifiers or backend keys.
@@ -21,7 +22,7 @@ Use Terraform **1.15.0** and the committed provider lockfiles. From the reposito
 ```sh
 # Check formatting, then validate and test each root without remote state access.
 terraform fmt -check -recursive infra
-for root in bootstrap access baseline reader sandbox; do
+for root in bootstrap access baseline reader sandbox observer; do
   terraform -chdir="infra/$root" init -backend=false -input=false || exit 1
   terraform -chdir="infra/$root" validate || exit 1
   terraform -chdir="infra/$root" test || exit 1
@@ -34,7 +35,7 @@ Provider downloads require network access. These test suites use mocked provider
 
 The foundation and dedicated sandbox are deployed. CloudTrail logging is enabled; Config recording is paused; Security Hub CSPM has no enabled standards. The $100 monthly account-wide budget sends configured alerts rather than imposing a spending cap. These statements summarize retained deployment records, not a fresh live inventory.
 
-The existing evidence reader does not cover the sandbox. Offline empty-state checks and the local lock do not expand permissions or prevent other writers. No automatic deployment workflow exists.
+The existing evidence reader does not cover the sandbox. Offline empty-state checks and the local lock do not expand permissions or prevent other writers. The new observer root has not been deployed and does not widen that reader. No automatic deployment workflow exists.
 
 ## Before any live plan
 
