@@ -29,6 +29,7 @@ The diagram is the intended paired design. Live feature release, baseline fusion
 | `sandbox_readiness.py` | Validate supplied bucket protection metadata | Cannot authenticate identity or freshness |
 | `sandbox_emptiness.py` | Require whole-bucket empty current/version/upload listings | Offline predicate; no live emptiness proof or concurrent-writer exclusion |
 | `scenario_recovery.py` | One suspension attempt and bounded restoration decisions | Consumes event names, not authenticated cloud receipts |
+| `recovery_intent.py` | Retain encrypted pre-state and fixed recovery actions under a matching lock | Preparation only; no verified live identity, execution or recovery-aware release |
 | `scenario_lock.py` | Persistent exclusion for cooperating local runs | Not distributed; no live/Terraform integration yet |
 
 ## Model and evaluation safeguards

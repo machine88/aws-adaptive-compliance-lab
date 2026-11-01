@@ -71,16 +71,15 @@ def acquire_sandbox_lock(root, run_id):
     return lock
 
 
-def release_sandbox_lock(root, run_id):
-    """Explicitly release an intact matching local lock after independent recovery review.
+def inspect_sandbox_lock(root, run_id):
+    """Validate an intact owner-only local lock before preparing recovery material.
 
     Inputs:
-        root: Same canonical private lock directory used at acquisition.
-        run_id: Exact retained owner identifier; a different identifier cannot release the lock.
+        root: Existing canonical private lock root shared by cooperating local runners.
+        run_id: Exact retained owner identifier for the fixed sandbox lock.
     Outputs:
-        None: Removes owner.json and the empty lock directory after strict metadata/content
-            checks. Raises on missing, replaced, partial or extra files. This filesystem action
-            does not verify cloud restoration or authorize execution; the caller must do so.
+        Path: Matching lock directory. Reads bounded owner metadata only; changes nothing.
+            Missing, partial, expanded, symlinked or mismatched locks raise before return.
     """
     validate_run_id(run_id)
     parent = private_lock_root(root)
@@ -97,6 +96,21 @@ def release_sandbox_lock(root, run_id):
                                "run_id": run_id}, sort_keys=True).encode("utf-8")
         if handle.read(len(expected) + 1) != expected:
             raise ValueError("Lock ownership differs from the retained run identifier")
+    return lock
+
+
+def release_sandbox_lock(root, run_id):
+    """Explicitly release an intact matching local lock after independent recovery review.
+
+    Inputs:
+        root: Same canonical private lock directory used at acquisition.
+        run_id: Exact retained owner identifier; a different identifier cannot release the lock.
+    Outputs:
+        None: Removes owner.json and the empty lock directory after strict metadata/content
+            checks. Raises on missing, replaced, partial or extra files. This filesystem action
+            does not verify cloud restoration or authorize execution; the caller must do so.
+    """
+    lock = inspect_sandbox_lock(root, run_id)
     # Do not use recursive cleanup: unexpected files must keep reuse blocked.
     (lock / "owner.json").unlink()
     lock.rmdir()
