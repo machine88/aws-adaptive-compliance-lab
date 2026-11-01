@@ -33,6 +33,7 @@ Read these in order before proposing a live workflow:
 6. [Encrypted recovery intent](recovery-intent.md).
 7. [Offline recovery reading and restoration review](recovery-review.md).
 8. [Preview-first local recovery operator](recovery-operator.md).
+9. [Sandbox observer](sandbox-observer.md), [supervised capture operator](sandbox-operator.md), and [observer access preparation](sandbox-observer-access-preparation.md).
 
 These documents describe components and review requirements. They do not grant live-run approval. The lock is local and cooperative; a future driver and Terraform entry points still need integration.
 
