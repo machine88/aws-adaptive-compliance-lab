@@ -27,7 +27,7 @@ Solid arrows show implemented paths; dashed arrows show integration or activatio
 
 [Open the full-size architecture diagram](docs/assets/architecture.svg)
 
-The telemetry reader's bucket allowlist excludes the sandbox. A separate bounded sandbox observer role is now deployed and its short-lived role identity verified; its first encrypted development capture still requires approval. Neither CI nor the offline scenario components deploy infrastructure or run cloud experiments. The ML prototype runs locally; no SageMaker or Bedrock service is used.
+The telemetry reader's bucket allowlist excludes the sandbox. A separate bounded sandbox observer role is now deployed and its short-lived role identity verified; one approved encrypted development pass has completed and its retained records passed local consistency checks. Neither CI nor the offline scenario components deploy infrastructure or run cloud experiments. The ML prototype runs locally; no SageMaker or Bedrock service is used.
 
 ## Current completion boundary
 
@@ -41,7 +41,7 @@ The telemetry reader's bucket allowlist excludes the sandbox. A separate bounded
 | Catalog | Twelve draft S3 cases and separate expected answers | EC2, Lambda, EKS, VPC and IAM coverage; source validation and independent review |
 | Analysis | Paired output and timing contracts | Locked R environment, power simulations and five-outcome inferential analysis |
 
-A completed development capture verified three snapshots and their acquisition schedule. That is an instrument-development observation, not a research trial or a performance result. The sandbox's current-object listing was verified empty; older versions, delete markers and unfinished uploads remain unverified live. [See the detailed roadmap](docs/implementation-plan.md).
+A completed development capture verified three snapshots and their acquisition schedule. That is an instrument-development observation, not a research trial or a performance result. A separate approved sandbox observer pass retained complete empty listings for current objects, versions/deletion markers and unfinished uploads, with the expected protections. These sequential receipt-time checks do not establish atomic emptiness or research readiness. [Verification details](docs/sandbox-verification.md). [See the detailed roadmap](docs/implementation-plan.md).
 
 ## Try it without an AWS account
 

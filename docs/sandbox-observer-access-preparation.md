@@ -1,6 +1,6 @@
 # Observer access review preparation
 
-Status: **approved saved plan applied and independently verified; live collection awaiting separate approval**. The existing evidence-reader excludes the sandbox. Its permissions remain unchanged. The deployed observer role is `dissertation-sandbox-observer` for the exact bucket `dissertation-sandbox-653464153304-us-east-2-s3-01` in Ohio, with no object-body access or mutations.
+Status: **approved saved plan applied and independently verified; one separately approved development capture completed and locally verified**. The existing evidence-reader excludes the sandbox. Its permissions remain unchanged. The deployed observer role is `dissertation-sandbox-observer` for the exact bucket `dissertation-sandbox-653464153304-us-east-2-s3-01` in Ohio, with no object-body access or mutations.
 
 ## Reproducible source analysis
 
@@ -50,7 +50,7 @@ The boundary is intentionally authored as a permissions ceiling; the identity ba
 
 All managed resources have `prevent_destroy`. Returning the enabled input to false after deployment is not a pause operation; it will be blocked as removal and requires explicit disposition review. Schema validation and three mock-provider runs cover disabled defaults, exact trust/ceiling/resource guards and root rejection. A source/policy provenance regression binds the unedited candidate to the two analyzed files; `protocol/observer-policy-generation.json` documents these inputs/outputs and closed approval gates. These checks do not call the AWS IAM simulator or constitute a saved live plan.
 
-The actual non-root planning identity, proposed IAM name absence and private five-create saved plan are now reviewed. Explicit approval was obtained for that saved plan, followed by application and verification of deployed trust, boundary, attachment and no-change state. The actual observer role-assumption/profile check is now complete; live collection still requires its own scope review and separate approval. Backend request/storage costs belong in that review; no request charges or new resources were incurred by the offline tests.
+The actual non-root planning identity, proposed IAM name absence and private five-create saved plan are now reviewed. Explicit approval was obtained for that saved plan, followed by application and verification of deployed trust, boundary, attachment and no-change state. The actual observer role-assumption/profile check is now complete; additional collection requires a new scope review and separate approval. Backend request/storage costs belong in that review; no request charges or new resources were incurred by the offline tests.
 
 ## Actual saved-plan review and approval
 
@@ -73,3 +73,7 @@ Independent AWS reads confirmed the exact trust principal, mandatory boundary, o
 The owned private local AWS config was extended with only the dedicated role profile, preserving existing entries. It requests 900-second sessions from the existing `dissertation` local-login source. The maintained worker's profile validator passed, and actual STS returned the expected assumed observer-role identity. Credentials were not exported, and that identity check read no sandbox data. AWS MCP continues to use its existing provisioning connection.
 
 The next single-pass development-capture scope is now prepared and previewed using the existing dedicated public recipient certificate, matched to its retained public fingerprint and checked for validity. No private key or Keychain item was accessed for preparation, and the proposed capture output directory remains absent. The private review binds the actual software/runtime/recipient, profile, output path and eleven S3 reads plus one observer STS operation. Authentication/preflight activity is outside that observation budget. Live capture still needs separate explicit approval; no scenario mutation, monitoring activation, pilot/confirmatory trial or study model training has occurred.
+
+## First approved development observer pass
+
+The separately reviewed single-pass scope was subsequently explicitly approved and executed once. Fifteen encrypted capture records and two operator journal records were retained. Local [archive verification](sandbox-verification.md) passed all scope, ciphertext-chain, receipt and administrative pre-state consistency checks using the previously trusted Keychain helper. Protected configuration and complete empty supplied current/version/delete-marker/multipart listings were observed at their separate receipt times. No plaintext evidence was exported, no scenario state changed and no retry occurred. Scientific/source-freshness/concurrency gates remain open; no research trial or study model training is claimed. Future collection or mutation has its own reviewed approval boundary.
