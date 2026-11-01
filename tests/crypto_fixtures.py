@@ -25,3 +25,19 @@ def synthetic_recipient(root):
     normalized = subprocess.run([binary, "x509", "-in", str(cert), "-outform", "PEM"],
                                 check=True, capture_output=True, timeout=5).stdout
     return binary, cert, key, hashlib.sha256(normalized).hexdigest()
+
+
+def synthetic_decrypt(ciphertext, binary, certificate, key):
+    """Authenticate disposable test CMS bytes directly into captured memory.
+
+    Inputs:
+        ciphertext: Synthetic encrypted record bytes; never a real user archive.
+        binary: Local OpenSSL 3 executable used by the disposable writer.
+        certificate: Disposable public recipient path created by synthetic_recipient.
+        key: Disposable unencrypted test-only private key path, never a real recipient.
+    Outputs:
+        bytes: Authenticated plaintext in memory; no plaintext file, AWS or Keychain access.
+    """
+    return subprocess.run([str(binary), "cms", "-decrypt", "-binary", "-inform", "DER",
+        "-recip", str(certificate), "-inkey", str(key)], input=ciphertext,
+        check=True, capture_output=True, timeout=5).stdout

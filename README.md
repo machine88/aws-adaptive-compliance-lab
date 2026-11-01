@@ -36,7 +36,7 @@ The telemetry reader's bucket allowlist excludes the sandbox. A separate bounded
 | AWS foundation | Protected state, scoped roles, telemetry storage and dedicated sandbox | Reviewed plans for further activation or permissions |
 | Monitoring | CloudTrail logging and service-reported delivery | Config/CSPM activation, attributable events and prospective instrument validation |
 | Evidence | Encrypted collectors, native scheduling and offline verification | Verified trigger, freshness, completeness and paired live monitoring |
-| Scenario execution | Offline pre-state checks, recovery planner, persistent lock, encrypted intent, bounded recovery reading, restoration candidates and a preview-first Keychain operator | Verified live source/restoration, reviewed lock release, integrated driver and approved rehearsal |
+| Scenario execution | Offline pre-state checks, recovery planner, persistent lock, encrypted intent, bounded recovery reading, restoration candidates, a preview-first Keychain operator and offline locked observer-to-intent integration | Verified live source/restoration, reviewed lock release, integrated driver and approved rehearsal |
 | AI/ML | Isolation Forest, bounded adaptation, deterministic mapping and synthetic demonstrations | Valid study inputs, independent splits and retained study model |
 | Catalog | Twelve draft S3 cases and separate expected answers | EC2, Lambda, EKS, VPC and IAM coverage; source validation and independent review |
 | Analysis | Paired output and timing contracts | Locked R environment, power simulations and five-outcome inferential analysis |
