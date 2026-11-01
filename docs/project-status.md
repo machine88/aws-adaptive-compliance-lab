@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator | Actual reviewed local verification; independent live receipts/clocks; recovery-aware release; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter | Reviewed observer permissions and bounded encrypted collector; actual reviewed local verification; independent live receipts/clocks; recovery-aware release; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -24,3 +24,5 @@ Current focus is package 1. Substantial research work remains after the engineer
 Each work update should state what changed and passed validation, how that advances the study, the next concrete step, and the remaining open packages or gates. Report deployment and research status separately from software tests. Do not turn tests, synthetic demonstrations or development captures into empirical performance claims or invented completion percentages.
 
 The [implementation plan](implementation-plan.md) retains methodological details, exact scientific requirements and approval boundaries. This page is a learning-oriented progress map, not deployment or data-collection authorization.
+
+The [sandbox observer preparation](sandbox-observer.md) now fixes eleven distinct read-only S3 requests and composes supplied, attributed receipt envelopes with existing protection and full-empty predicates. Its collector, narrow access role and live capture remain pending review and explicit approval. No new AWS observations or trials were produced.
