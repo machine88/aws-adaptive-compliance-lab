@@ -1,15 +1,14 @@
 """Synthetic recovery-intent binding, encryption and fail-closed retention tests; no AWS IO."""
 import copy
-import hashlib
 import json
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from research.catalog import canonical_sha256
+from tests.crypto_fixtures import synthetic_recipient
 from research.recovery_intent import build_recovery_intent, retain_recovery_intent, verify_recovery_intent
 from research.scenario_lock import acquire_sandbox_lock, release_sandbox_lock
 from tests.test_sandbox_emptiness import fixture as listing_fixture
@@ -34,16 +33,7 @@ class RecoveryIntentTests(unittest.TestCase):
         """
         cls.temporary = tempfile.TemporaryDirectory()
         cls.parent = Path(cls.temporary.name).resolve()
-        cls.binary = "/opt/homebrew/opt/openssl@3/bin/openssl"
-        if not Path(cls.binary).exists():
-            cls.binary = shutil.which("openssl")
-        cls.cert, cls.key = cls.parent / "public.pem", cls.parent / "synthetic-only.key"
-        subprocess.run([cls.binary, "req", "-x509", "-newkey", "rsa:3072", "-nodes", "-keyout", str(cls.key),
-                        "-out", str(cls.cert), "-days", "1", "-subj", "/CN=synthetic-recovery-intent"],
-                       check=True, capture_output=True, timeout=30)
-        normalized = subprocess.run([cls.binary, "x509", "-in", str(cls.cert), "-outform", "PEM"],
-                                    check=True, capture_output=True, timeout=5).stdout
-        cls.recipient = hashlib.sha256(normalized).hexdigest()
+        cls.binary, cls.cert, cls.key, cls.recipient = synthetic_recipient(cls.parent)
 
     @classmethod
     def tearDownClass(cls):

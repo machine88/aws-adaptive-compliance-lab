@@ -31,6 +31,7 @@ Read these in order before proposing a live workflow:
 4. [Recovery decision planner](scenario-recovery-planner.md).
 5. [Persistent local execution lock](scenario-execution-lock.md).
 6. [Encrypted recovery intent](recovery-intent.md).
+7. [Offline recovery reading and restoration review](recovery-review.md).
 
 These documents describe components and review requirements. They do not grant live-run approval. The lock is local and cooperative; a future driver and Terraform entry points still need integration.
 
