@@ -1,6 +1,7 @@
 """Bounded read plans and encrypted local archives for development AWS observations."""
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -96,6 +97,22 @@ def json_default(value):
     raise TypeError("Unsupported or timezone-naive evidence value")
 
 
+def sync_archive_directory(directory):
+    """Ask the OS to synchronize an archive directory entry before reporting persistence.
+
+    Inputs:
+        directory: Existing local directory whose entries were created by the archive writer.
+    Outputs:
+        None: Opens, fsyncs and closes a directory descriptor. Filesystem errors propagate;
+            this is not a guarantee against hardware loss or unsupported storage semantics.
+    """
+    descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 class EncryptedArchive:
     """Write only CMS-encrypted evidence using a public recipient certificate."""
 
@@ -103,12 +120,14 @@ class EncryptedArchive:
         """Validate encryption prerequisites and reserve a new private output directory.
 
         Inputs:
+            self: Archive instance receiving validated public-recipient and filesystem settings.
             root: New directory path; existing paths are rejected.
             certificate: Public RSA recipient certificate path, never a private key.
             openssl: Optional OpenSSL 3 executable path.
             timeout_seconds: Optional integer 1..300 local crypto deadline; None preserves legacy behavior.
         Outputs:
-            None: Creates a mode-700 directory and public certificate copy after validation.
+            None: Creates a mode-700 directory and synchronized public certificate copy after
+                validation. Persistence failures propagate and leave partial output for review.
         """
         if timeout_seconds is not None and (type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 300):
             raise ValueError("Bounded integer crypto timeout required")
@@ -134,15 +153,23 @@ class EncryptedArchive:
         with self.cert.open("xb") as stream:
             self.cert.chmod(0o600)
             stream.write(public)
+            stream.flush()
+            os.fsync(stream.fileno())
+        # Retain the public-recipient entry and the new archive directory before use.
+        sync_archive_directory(self.root)
+        sync_archive_directory(self.root.parent)
         self.receipts = []
 
     def write(self, value):
-        """Encrypt one record in memory and save its ciphertext exclusively.
+        """Encrypt one record and acknowledge it only after local synchronization succeeds.
 
         Inputs:
+            self: Initialized archive instance with an exclusive output directory.
             value: JSON-compatible evidence envelope, including any raw responses.
         Outputs:
-            dict: Ciphertext filename/hash receipt; appends a mode-600 CMS file.
+            dict: Ciphertext filename/hash receipt after file and directory fsync succeeds.
+                Writes a mode-600 CMS file; appends no receipt on synchronization failure.
+                Partial ciphertext remains exclusive and blocks silent overwrite/retry.
         """
         plaintext = json.dumps(value, default=json_default, sort_keys=True).encode()
         # Authenticated content encryption protects raw evidence even on unencrypted disks.
@@ -151,6 +178,10 @@ class EncryptedArchive:
         with (self.root / name).open("xb") as stream:
             (self.root / name).chmod(0o600)
             stream.write(encrypted)
+            stream.flush()
+            os.fsync(stream.fileno())
+        # A persisted file without a persisted filename is not yet an acknowledged record.
+        sync_archive_directory(self.root)
         receipt = {"file": name, "ciphertext_sha256": hashlib.sha256(encrypted).hexdigest()}
         self.receipts.append(receipt)
         return receipt
