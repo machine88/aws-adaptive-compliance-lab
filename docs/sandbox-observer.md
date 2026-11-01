@@ -1,14 +1,14 @@
 # Sandbox observer preparation
 
-Status: **offline request adapter and encrypted library engine implemented; preview-first supervised operator implemented; permission deployment and live collection pending review**. The request adapter performs no AWS calls, reads no credentials and writes no evidence. Supplied responses are not authenticated observations.
+Status: **offline request adapter and encrypted library engine implemented; preview-first supervised operator implemented; observer access deployed and verified; live collection awaiting separate approval**. The request adapter performs no AWS calls, reads no credentials and writes no evidence. Supplied responses are not authenticated observations.
 
 `research/sandbox_observer.py` defines eleven distinct S3 requests for the dedicated Ohio development bucket. Eight read bucket protections/location/tags/policy; three list current objects, object versions/deletion markers, and unfinished multipart uploads. The current-object listing is reused by both existing predicates. Every request names the exact bucket and expected account owner. Listings cover the entire bucket from the first page with a 1000-entry ceiling, without filters or continuation. Nonempty or truncated listings fail the existing emptiness predicate; pagination cannot repair that result.
 
-The adapter requires a supplied STS identity naming the proposed `dissertation-sandbox-observer` assumed role in account `653464153304`. It retains copies of that identity, all raw responses, service request IDs, request parameters, UTC start/end clocks and monotonic elapsed durations. It checks consistency and successful response status before invoking the existing pre-state predicates. These checks cannot authenticate the source, establish clock accuracy, exclude concurrent writes or authorize a scenario. Rejected inputs must eventually remain in a separate encrypted failure record; this adapter does not archive them.
+The adapter requires a supplied STS identity naming the dedicated `dissertation-sandbox-observer` assumed role in account `653464153304`. It retains copies of that identity, all raw responses, service request IDs, request parameters, UTC start/end clocks and monotonic elapsed durations. It checks consistency and successful response status before invoking the existing pre-state predicates. These checks cannot authenticate the source, establish clock accuracy, exclude concurrent writes or authorize a scenario. Rejected inputs must eventually remain in a separate encrypted failure record; this adapter does not archive them.
 
 ## Proposed permission and collection review
 
-No permission change is included in this change. The current evidence-reader role excludes this bucket. Do not bypass it using the provisioning user or widen it silently.
+The separately approved observer-access plan is now applied and verified. The telemetry evidence-reader still excludes this bucket; its permissions were not widened. The observer uses its own bounded role. Do not bypass an access failure using the provisioning user.
 
 Before a live observation, prepare and review:
 
@@ -26,7 +26,7 @@ The [supervised operator](sandbox-operator.md) now provides a preview-first comm
 
 ## Encrypted capture engine
 
-`research/sandbox_capture.py` now implements the library engine. The supervised wrapper is implemented and tested offline; observer access deployment, actual local scope review and live-capture approval remain open. It accepts an explicit SDK session and a new bounded `EncryptedArchive`; the existing evidence-reader collector remains unchanged.
+`research/sandbox_capture.py` now implements the library engine. The supervised wrapper is implemented and tested offline; observer access is deployed and its local profile verified. The actual single-pass scope has been prepared and previewed; live-capture approval remains open. It accepts an explicit SDK session and a new bounded `EncryptedArchive`; the existing evidence-reader collector remains unchanged.
 
 `capture_scope(source_sha256, recipient_sha256)` describes the exact requests and limits. `capture_sandbox` checks the independently supplied scope hash, current maintained source and normalized recipient before constructing clients. A hash comparison cannot establish human approval. This engine scope does not yet bind the profile/credential chain, host or archive path: the wrapper supplies declared profile/path bindings, while actual credential-chain availability and host trust require separate review. Source fingerprints do not authenticate installed dependencies or the host.
 
@@ -38,4 +38,4 @@ Scope, identity receipt, each S3 receipt, composed pre-state and completion are 
 
 Offline integration tests use real SDK service models/stubs and disposable local certificates. They exercise ciphertext round trips, early identity/tag/provider/deadline rejection, scope/recipient mismatch and the one-attempt send guard. They do not establish live permissions, service availability or empirical study findings.
 
-The [observer access review preparation](sandbox-observer-access-preparation.md) records the reproducible policy-analysis command and its rejected broad candidate. No access policy was applied.
+The [observer access review preparation](sandbox-observer-access-preparation.md) records the reproducible policy-analysis command and its rejected broad candidate. The reviewed role/policy pair was subsequently approved, applied and verified; standalone generated-policy use remains rejected.
