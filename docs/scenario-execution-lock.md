@@ -19,3 +19,5 @@ A residual lock requires inspecting the retained run and actual AWS state under 
 ## Verification
 
 Synthetic tests cover duplicate acquisition, matching release/reacquisition, private file modes, persistence after a child process exits, wrong-owner release, partial/extra records, broad directory permissions, path-like identifiers and symlinked record rejection. Tests create only temporary local files. Every function documents purpose, inputs, outputs and side effects. No research trial or paid cloud operation occurs.
+
+The [recovery-intent preparer](recovery-intent.md) now uses read-only `inspect_sandbox_lock(root, run_id)` before creating an exclusive archive beneath the lock. Inspection shares the original release checks. A lock containing that archive deliberately fails owner-only inspection/release; a future reviewed recovery-aware closure procedure is still required.

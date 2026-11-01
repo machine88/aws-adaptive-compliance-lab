@@ -8,4 +8,4 @@ The OS synchronization calls improve persistence ordering. They do not prove sur
 
 Two synthetic failure-boundary tests check acknowledgment ordering and failure at either file or directory synchronization. They mock encryption output and are not cryptographic proofs. The existing real CMS encryption/decryption roundtrip and regression suite remain the encryption checks.
 
-This is a prerequisite for future retained recovery intent. It does not yet implement a recovery-intent schema, emergency recovery reader, live scenario driver, verified restoration or live-run approval. No AWS calls, private-key access, new recipient keys or study observations are introduced.
+The [recovery-intent preparer](recovery-intent.md) now uses this writer to retain an encrypted development pre-state and fixed action descriptions under a matching local lock. The emergency recovery reader, live scenario driver, verified restoration, recovery-aware release and live-run approval remain unimplemented. No AWS calls, private-key access, new recipient keys or study observations are introduced.

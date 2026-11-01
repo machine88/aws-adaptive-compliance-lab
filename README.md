@@ -4,6 +4,8 @@
 
 AWS Adaptive Compliance Lab combines reproducible Terraform infrastructure, encrypted evidence collection, an Isolation Forest prototype, bounded adaptation, and deterministic technical compliance mapping. Its purpose is to investigate when these approaches detect configuration problems, where they disagree, and how trustworthy their evidence is.
 
+**Academic context.** This repository supports the dissertation study **“AI-Driven Adaptive Security Compliance Monitoring for AWS Cloud-Native Systems”** by **Martin M. Morales**, conducted as part of the **Doctor of Science in Computer Science** program at **Aspen University**. The project provides the software and experimental infrastructure for comparing adaptive, AI-driven compliance monitoring with native AWS monitoring.
+
 **Status: active development.** Infrastructure is partially deployed, and the ML pipeline works with synthetic engineering fixtures. No study model has been trained and no pilot or confirmatory research results exist. This is research software, not a validated compliance product or a certification tool.
 
 [Get started](#try-it-without-an-aws-account) · [Documentation](docs/README.md) · [Research pipeline](research/README.md) · [Infrastructure](infra/README.md) · [Roadmap](docs/implementation-plan.md)
@@ -34,7 +36,7 @@ The reader's current bucket allowlist excludes the sandbox. Neither CI nor the o
 | AWS foundation | Protected state, scoped roles, telemetry storage and dedicated sandbox | Reviewed plans for further activation or permissions |
 | Monitoring | CloudTrail logging and service-reported delivery | Config/CSPM activation, attributable events and prospective instrument validation |
 | Evidence | Encrypted collectors, native scheduling and offline verification | Verified trigger, freshness, completeness and paired live monitoring |
-| Scenario execution | Offline pre-state checks, bounded recovery planner and persistent local lock | Durable recovery intent, integrated driver and approved live rehearsal |
+| Scenario execution | Offline pre-state checks, recovery planner, persistent local lock and encrypted recovery-intent preparation | Recovery-aware closure, integrated driver and approved live rehearsal |
 | AI/ML | Isolation Forest, bounded adaptation, deterministic mapping and synthetic demonstrations | Valid study inputs, independent splits and retained study model |
 | Catalog | Twelve draft S3 cases and separate expected answers | EC2, Lambda, EKS, VPC and IAM coverage; source validation and independent review |
 | Analysis | Paired output and timing contracts | Locked R environment, power simulations and five-outcome inferential analysis |
