@@ -27,7 +27,7 @@ Solid arrows show implemented paths; dashed arrows show integration or activatio
 
 [Open the full-size architecture diagram](docs/assets/architecture.svg)
 
-The reader's current bucket allowlist excludes the sandbox. Neither CI nor the offline scenario components deploy infrastructure or run cloud experiments. The ML prototype runs locally; no SageMaker or Bedrock service is used.
+The telemetry reader's bucket allowlist excludes the sandbox. A separate bounded sandbox observer role is now deployed and its short-lived role identity verified; its first encrypted development capture still requires approval. Neither CI nor the offline scenario components deploy infrastructure or run cloud experiments. The ML prototype runs locally; no SageMaker or Bedrock service is used.
 
 ## Current completion boundary
 

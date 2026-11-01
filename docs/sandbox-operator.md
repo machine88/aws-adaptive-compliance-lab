@@ -1,6 +1,6 @@
 # Supervised sandbox observation operator
 
-Status: implemented and tested offline. **No actual scope is approved, no observer role/profile is deployed by this change, and no live capture has run.** Deployment and collection require separate explicit approval of their reviewed artifacts.
+Status: implemented and tested offline; the separately approved observer role is deployed and its local short-lived profile identity verified. **The actual single-pass scope is prepared and previewed, but live collection is not yet approved and has not run.** Access deployment and collection have separate approval gates.
 
 The POSIX operator connects the fixed read-only [capture engine](sandbox-observer.md) to the existing silent process-group supervisor. This is development evidence only. It does not mutate the sandbox, run a scenario, train ML, release a lock or create pilot/confirmatory trials.
 
