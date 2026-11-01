@@ -1,4 +1,5 @@
 """Offline verification of bounded observer archives; plaintext stays in caller-owned memory."""
+import copy
 from pathlib import Path
 
 from research.archive_ingestion import read_archive_records
@@ -104,8 +105,8 @@ def verify_sandbox_records(scope, approved_scope_sha256, fingerprint, journal, j
             "formal_trial_authorized": False, "live_execution_allowed": False, "research_trials": 0}
 
 
-def verify_sandbox_archive(root, scope, approved_scope_sha256, fingerprint, decrypt_record):
-    """Read private archives through an authenticated callback and verify their historical bindings.
+def read_verified_sandbox_prestate(root, scope, approved_scope_sha256, fingerprint, decrypt_record):
+    """Read and verify private archives, returning raw pre-state only to a trusted in-memory caller.
 
     Inputs:
         root: Canonical private operator output directory, equal to the approved declared path.
@@ -114,7 +115,8 @@ def verify_sandbox_archive(root, scope, approved_scope_sha256, fingerprint, decr
         fingerprint: Trusted capture ciphertext inventory fingerprint retained outside the archives.
         decrypt_record: Existing trusted callback returning authenticated plaintext bytes in memory.
     Outputs:
-        dict: Minimal consistency report; no plaintext files, AWS calls or input changes.
+        dict: Private report/prestate/identity-receipt bundle; never print or serialize its raw
+            fields as plaintext. No plaintext files, AWS calls or input changes.
             Reads at most two journal records with 1 MiB and fifteen capture records with 4 MiB
             cumulative ciphertext/plaintext budgets respectively. Snapshot inventory reads use
             the existing 64 MiB ceiling. Rejects inventory changes before/after decryption.
@@ -137,4 +139,22 @@ def verify_sandbox_archive(root, scope, approved_scope_sha256, fingerprint, decr
     result = verify_sandbox_records(scope, approved_scope_sha256, fingerprint, journal, journal_receipts, capture, capture_receipts)
     if snapshot_fingerprint(root / "capture", recipient) != before_capture or snapshot_fingerprint(root / "journal", recipient) != before_journal:
         raise ValueError("Observer inventories changed during verification")
-    return result
+    return {"report": result, "prestate": copy.deepcopy(capture[13]["record"]),
+            "identity_receipt": copy.deepcopy(capture[1]["receipt"])}
+
+
+def verify_sandbox_archive(root, scope, approved_scope_sha256, fingerprint, decrypt_record):
+    """Return only a minimal report from the shared bounded private pre-state reader.
+
+    Inputs:
+        root: Canonical private output directory equal to the approved scope path.
+        scope: Independently retained approved historical operator scope.
+        approved_scope_sha256: Trusted scope fingerprint retained outside the archive.
+        fingerprint: Trusted capture inventory fingerprint retained outside the archive.
+        decrypt_record: Existing authenticated callback returning plaintext bytes privately in memory.
+    Outputs:
+        dict: Minimal consistency report with scientific/execution gates closed. Uses the same
+            two-record/1 MiB journal and fifteen-record/4 MiB capture limits as the private reader.
+            No raw pre-state is returned, no plaintext file is written and no AWS call occurs.
+    """
+    return read_verified_sandbox_prestate(root, scope, approved_scope_sha256, fingerprint, decrypt_record)["report"]

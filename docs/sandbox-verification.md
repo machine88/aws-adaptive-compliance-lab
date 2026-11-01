@@ -7,6 +7,7 @@
 | API | Inputs | Output |
 | --- | --- | --- |
 | `verify_sandbox_records` | Approved historical scope/hash, external inventory pin, decoded journal/capture records and their ciphertext receipts | Minimal consistency report; invalid bindings, requests, clocks, pre-state or completion chains fail |
+| `read_verified_sandbox_prestate` | Same private archive/scope/pin/callback inputs | Private in-memory report, pre-state and identity receipt for trusted composition; never log or serialize its raw fields |
 | `verify_sandbox_archive` | Private declared output root, approved historical scope/hash, external inventory pin and trusted authenticated callback | Same report after bounded private-file reading and before/after inventory checks |
 
 Success requires exactly two journal records and fifteen capture records. The verifier checks canonical contiguous ciphertext receipts, the enclosing operator scope, successful worker status and the capture's opening scope. It checks all twelve ordered request envelopes, service attribution for identity, clock consistency and bounded SDK durations. The existing administrative predicates reconstruct protections and all three full-bucket empty-listing receipts; that reconstructed pre-state must equal the retained pre-state. The final encrypted completion must name every predecessor receipt in order and retain development-only closed scientific/execution gates.
@@ -21,7 +22,7 @@ Historical captures are verified against their retained approved scope. The veri
 
 It establishes internal consistency of the retained encrypted records, expected request scope, supplied host clocks, bucket-protection predicates and complete empty supplied listings. It does not establish sender authenticity, independently attested AWS identity, synchronized clocks, freshness at a later time, simultaneous emptiness or exclusion of other writers. CMS authenticated decryption protects record integrity for the recipient; possession of a public encryption certificate is not a provider signature.
 
-The report keeps source/freshness, concurrency, trigger, ML, formal-trial and live scenario-execution gates closed. No verified historical observation may silently become a fresh pre-mutation gate. The next runner integration needs prospective source/clock checks under the local lock, encrypted recovery intent, controlled restoration and a separately reviewed rehearsal.
+The report keeps source/freshness, concurrency, trigger, ML, formal-trial and live scenario-execution gates closed. No verified historical observation may silently become a fresh pre-mutation gate. The [locked preparation integration](observer-recovery-preparation.md) now composes a new observer callback and encrypted intent offline. Independent source/clock proof, controlled restoration and a separately reviewed live rehearsal remain required.
 
 ## Actual development milestone
 
