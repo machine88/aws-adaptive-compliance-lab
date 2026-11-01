@@ -8,7 +8,7 @@ AWS Adaptive Compliance Lab combines reproducible Terraform infrastructure, encr
 
 **Status: active development.** Infrastructure is partially deployed, and the ML pipeline works with synthetic engineering fixtures. No study model has been trained and no pilot or confirmatory research results exist. This is research software, not a validated compliance product or a certification tool.
 
-[Get started](#try-it-without-an-aws-account) · [Documentation](docs/README.md) · [Research pipeline](research/README.md) · [Infrastructure](infra/README.md) · [Roadmap](docs/implementation-plan.md)
+[Get started](#try-it-without-an-aws-account) · [Documentation](docs/README.md) · [Research pipeline](research/README.md) · [Infrastructure](infra/README.md) · [Roadmap](docs/implementation-plan.md) · [Progress and remaining work](docs/project-status.md)
 
 ## What the project does
 
@@ -36,7 +36,7 @@ The reader's current bucket allowlist excludes the sandbox. Neither CI nor the o
 | AWS foundation | Protected state, scoped roles, telemetry storage and dedicated sandbox | Reviewed plans for further activation or permissions |
 | Monitoring | CloudTrail logging and service-reported delivery | Config/CSPM activation, attributable events and prospective instrument validation |
 | Evidence | Encrypted collectors, native scheduling and offline verification | Verified trigger, freshness, completeness and paired live monitoring |
-| Scenario execution | Offline pre-state checks, recovery planner, persistent lock, encrypted intent, bounded recovery reading and restoration candidates | Verified live source/restoration, reviewed lock release, integrated driver and approved rehearsal |
+| Scenario execution | Offline pre-state checks, recovery planner, persistent lock, encrypted intent, bounded recovery reading, restoration candidates and a preview-first Keychain operator | Verified live source/restoration, reviewed lock release, integrated driver and approved rehearsal |
 | AI/ML | Isolation Forest, bounded adaptation, deterministic mapping and synthetic demonstrations | Valid study inputs, independent splits and retained study model |
 | Catalog | Twelve draft S3 cases and separate expected answers | EC2, Lambda, EKS, VPC and IAM coverage; source validation and independent review |
 | Analysis | Paired output and timing contracts | Locked R environment, power simulations and five-outcome inferential analysis |
