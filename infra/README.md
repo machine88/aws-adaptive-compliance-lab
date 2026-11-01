@@ -35,7 +35,7 @@ Provider downloads require network access. These test suites use mocked provider
 
 The foundation and dedicated sandbox are deployed. CloudTrail logging is enabled; Config recording is paused; Security Hub CSPM has no enabled standards. The $100 monthly account-wide budget sends configured alerts rather than imposing a spending cap. These statements summarize retained deployment records, not a fresh live inventory.
 
-The existing evidence reader does not cover the sandbox. A separate observer role is deployed with its mandatory boundary, exact trust and one generated attachment verified; the follow-up plan reported no changes. Its active input remains private and must stay enabled in future plans. Offline empty-state checks and the local lock do not prevent other writers. Live sandbox collection still requires its own reviewed approval. No automatic deployment workflow exists.
+The existing evidence reader does not cover the sandbox. A separate observer role is deployed with its mandatory boundary, exact trust and one generated attachment verified; the follow-up plan reported no changes. Its active input remains private and must stay enabled in future plans. Offline empty-state checks and the local lock do not prevent other writers. One separately approved development metadata pass has completed; additional captures or scenario changes still require their own reviewed approval. No automatic deployment workflow exists.
 
 ## Before any live plan
 

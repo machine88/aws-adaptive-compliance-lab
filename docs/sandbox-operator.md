@@ -1,6 +1,6 @@
 # Supervised sandbox observation operator
 
-Status: implemented and tested offline; the separately approved observer role is deployed and its local short-lived profile identity verified. **The actual single-pass scope is prepared and previewed, but live collection is not yet approved and has not run.** Access deployment and collection have separate approval gates.
+Status: implemented and tested offline; the separately approved observer role is deployed and its local short-lived profile identity verified. **One separately approved single-pass development capture has completed and its encrypted records passed bounded local verification. Further captures require their own reviewed approval.** Access deployment and collection have separate approval gates.
 
 The POSIX operator connects the fixed read-only [capture engine](sandbox-observer.md) to the existing silent process-group supervisor. This is development evidence only. It does not mutate the sandbox, run a scenario, train ML, release a lock or create pilot/confirmatory trials.
 
@@ -49,3 +49,5 @@ On timeout or cancellation, the reused supervisor kills and reaps the worker pro
 ## Validation
 
 Focused tests compose the real operator, worker, SDK stubs and CMS writer with disposable recipients. They cover default preview, paired execution flags, stale review/source/runtime rejection before output, exact profile constraints, encrypted successful receipts, exclusive output reuse and encrypted timeout status. Existing supervisor tests verify actual process-group termination/reaping; that machinery is reused. Tests access no real AWS profile, Keychain or study evidence.
+
+See [offline sandbox verification](sandbox-verification.md) for the archived-record checks, actual development milestone and remaining scientific gates.

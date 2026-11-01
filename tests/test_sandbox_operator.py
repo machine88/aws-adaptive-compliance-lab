@@ -1,5 +1,7 @@
 """Offline operator/worker composition tests; no real profiles, credentials or AWS calls."""
 import contextlib
+import hashlib
+import subprocess
 import copy
 import io
 import json
@@ -10,6 +12,7 @@ from unittest.mock import Mock, patch
 
 from research.catalog import canonical_sha256
 from research.sandbox_operator import PROFILE, build_sandbox_scope, run_sandbox_operator
+from research.sandbox_verification import verify_sandbox_archive, verify_sandbox_records
 from scripts.capture_sandbox import main
 from scripts.sandbox_capture_worker import run_worker, validate_observer_profile
 from tests.crypto_fixtures import synthetic_recipient
@@ -116,7 +119,7 @@ class SandboxOperatorTests(unittest.TestCase):
         self.assertFalse((self.root / "run").exists())
 
     def test_operator_worker_sdk_and_encryption_compose(self):
-        """Connect the real worker/collector to modeled SDK stubs and real disposable CMS output.
+        """Compose SDK capture, CMS and bounded verification; reject substituted evidence.
 
         Inputs:
             self: Test instance with real local bindings, synthetic SDK responses and recipient.
@@ -168,6 +171,53 @@ class SandboxOperatorTests(unittest.TestCase):
         self.assertEqual(journal[-1]["ciphertext_fingerprint"], result["ciphertext_fingerprint"])
         self.assertEqual(len(result["ciphertext_fingerprint"]), 64)
         self.assertEqual(journal[0]["scope_sha256"], canonical_sha256(self.scope))
+
+        def decrypt(ciphertext):
+            """Authenticate disposable CMS data directly into captured test memory.
+
+            Inputs:
+                ciphertext: Test-only encrypted record bytes from the bounded reader.
+            Outputs:
+                bytes: Authenticated plaintext in memory; no plaintext file, real key or Keychain.
+            """
+            return subprocess.run([self.binary, "cms", "-decrypt", "-binary", "-inform", "DER",
+                "-recip", str(self.cert), "-inkey", str(self.key)], input=ciphertext,
+                check=True, capture_output=True, timeout=5).stdout
+
+        report = verify_sandbox_archive(root, self.scope, canonical_sha256(self.scope), result["ciphertext_fingerprint"], decrypt)
+        self.assertTrue(report["receipts_consistent"])
+        self.assertTrue(report["supplied_full_bucket_listings_empty"])
+        self.assertFalse(report["source_freshness_verified"])
+        self.assertFalse(report["formal_trial_authorized"])
+        forbidden = Mock(side_effect=AssertionError("No callback for wrong inventory pin"))
+        with self.assertRaises(ValueError):
+            verify_sandbox_archive(root, self.scope, canonical_sha256(self.scope), "0" * 64, forbidden)
+        forbidden.assert_not_called()
+        capture_receipts = [{"file": file.name, "ciphertext_sha256": hashlib.sha256(file.read_bytes()).hexdigest()}
+                            for file in sorted((root / "capture").glob("record-*.cms"))]
+        journal_receipts = [{"file": file.name, "ciphertext_sha256": hashlib.sha256(file.read_bytes()).hexdigest()}
+                            for file in sorted((root / "journal").glob("record-*.cms"))]
+        for case in ("operator_binding", "request", "clock", "prestate", "completion_chain", "phase", "worker_failed"):
+            changed_capture, changed_journal = copy.deepcopy(records), copy.deepcopy(journal)
+            if case == "operator_binding":
+                changed_capture[0]["operator_scope_sha256"] = "0" * 64
+            elif case == "request":
+                changed_capture[2]["receipt"]["request"]["Bucket"] = "other"
+            elif case == "clock":
+                changed_capture[1]["receipt"]["elapsed_ns"] = True
+            elif case == "prestate":
+                changed_capture[13]["record"]["live_execution_allowed"] = True
+            elif case == "completion_chain":
+                changed_capture[-1]["receipts"][0]["ciphertext_sha256"] = "0" * 64
+            elif case == "phase":
+                changed_capture[-1]["phase"] = "confirmatory"
+            else:
+                changed_journal[-1]["worker_status"] = "timeout"
+            with self.subTest(verification_case=case):
+                with self.assertRaises(ValueError):
+                    verify_sandbox_records(self.scope, canonical_sha256(self.scope), result["ciphertext_fingerprint"],
+                        changed_journal, journal_receipts, changed_capture, capture_receipts)
+
 
     def test_timeout_and_profile_failures_remain_closed(self):
         """Preserve failed worker status and reject credential-process or wrong-role profiles.
