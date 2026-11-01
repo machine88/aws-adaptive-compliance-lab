@@ -66,3 +66,8 @@ jobs:
           terraform -chdir=infra/sandbox init -backend=false -input=false
           terraform -chdir=infra/sandbox validate
           terraform -chdir=infra/sandbox test
+
+          # Input: disabled observer access and mock identities. Output: isolated read-only boundary checks.
+          terraform -chdir=infra/observer init -backend=false -input=false
+          terraform -chdir=infra/observer validate
+          terraform -chdir=infra/observer test
