@@ -1,6 +1,6 @@
 # Observer access review preparation
 
-Status: **disabled-by-default Terraform prepared and tested offline; no saved live plan or deployment approval yet**. The existing evidence-reader excludes the sandbox. Its permissions remain unchanged. The intended new role is `dissertation-sandbox-observer` for the exact bucket `dissertation-sandbox-653464153304-us-east-2-s3-01` in Ohio, with no object-body access or mutations.
+Status: **actual remote-backend saved plan reviewed; awaiting explicit deployment approval**. The existing evidence-reader excludes the sandbox. Its permissions remain unchanged. The intended new role is `dissertation-sandbox-observer` for the exact bucket `dissertation-sandbox-653464153304-us-east-2-s3-01` in Ohio, with no object-body access or mutations.
 
 ## Reproducible source analysis
 
@@ -36,7 +36,7 @@ It also included wildcard bucket/access-point resources, `s3:GetObjectAcl`, two 
 4. Obtain approval of that concrete access plan before applying. Separately review the actual local profile/source identity and public-recipient/operator scope before requesting live-capture approval. Keep raw plan/config/account responses private.
 5. Record request-cost assumptions with the reviewed capture. The account's $100 alert remains a notification, not an automatic cutoff. This change creates no resources or AWS request charges.
 
-The [operator documentation](sandbox-operator.md) describes the software now ready for that local review. No successful live observation, IAM simulation or actual profile validation is claimed.
+The [operator documentation](sandbox-operator.md) describes the software now ready for that local review. No sandbox observation or actual observer-role profile validation is claimed. The saved deployment plan and limited AWS policy checks are described below; no IAM apply has occurred.
 
 ## Prepared Terraform scope
 
@@ -50,4 +50,16 @@ The boundary is intentionally authored as a permissions ceiling; the identity ba
 
 All managed resources have `prevent_destroy`. Returning the enabled input to false after deployment is not a pause operation; it will be blocked as removal and requires explicit disposition review. Schema validation and three mock-provider runs cover disabled defaults, exact trust/ceiling/resource guards and root rejection. A source/policy provenance regression binds the unedited candidate to the two analyzed files; `protocol/observer-policy-generation.json` documents these inputs/outputs and closed approval gates. These checks do not call the AWS IAM simulator or constitute a saved live plan.
 
-Next: verify actual non-root identity and live name/state conflicts read-only, establish the source principal's exact role-assumption rights, generate a private saved plan and inspect every proposed change. Obtain explicit approval before applying it. Live collection requires its own scope review and approval afterward. Backend request/storage costs belong in that review; no request charges or new resources were incurred by the offline tests.
+The actual non-root planning identity, proposed IAM name absence and private five-create saved plan are now reviewed. Obtain explicit approval before applying only that saved plan, then independently verify the deployed trust, boundary, attachment and no-change state. Actual observer role-assumption/profile validation remains a post-deployment task. Live collection requires its own scope review and approval afterward. Backend request/storage costs belong in that review; no request charges or new resources were incurred by the offline tests.
+
+## Actual saved-plan review completed; deployment unapproved
+
+AWS MCP and the actual Terraform identity data confirmed IAM user `martin-morales-personal` in account `653464153304`. Scoped IAM preflight calls returned `NoSuchEntity` for the proposed observer role and its two policy names. The real remote-backend saved plan contains exactly **five creates, zero updates and zero deletions**: two IAM policies, one bounded observer role, one policy attachment and the Terraform identity guard. No apply occurred.
+
+Planning used the maintained S3 backend and default workspace, with locking disabled only for this read-only plan. The backend remains configured for native locking during apply. A subsequent metadata-only check returned HTTP 404 for the observer state key; it remains absent. The pinned Terraform backend's [default-workspace implementation](https://github.com/hashicorp/terraform/blob/v1.15.0/internal/backend/remote-state/s3/backend_state.go) was inspected before initialization to avoid creating a non-default workspace/state. This is not permission to disable locking for apply.
+
+AWS Access Analyzer `ValidatePolicy` returned zero findings for both actual planned policy documents. Seven AWS `SimulateCustomPolicy` cases produced **66 expected resource/action decisions**: twelve allowed and fifty-four explicitly denied, with no missing context or unconsumed pagination. Cases covered intended bucket metadata, caller identity, another bucket, wrong region, insecure transport, object resources and forbidden actions. Simulation did not execute those actions and does not establish all live SCP, resource/session-policy or service effects. It is not evidence of detection performance or research readiness.
+
+The saved binary plan, raw JSON, source/runtime hashes, AWS responses and exact approval fingerprint remain private in the ignored evidence directory, with owned mode-0700 directories and mode-0600 review files. No private approval pin, raw response or saved plan is published here. Documentation commits can follow the plan's source commit; its bound Terraform source and provider/runtime files must still match before apply.
+
+The private review explains costs and recovery. [IAM itself is offered at no additional charge](https://aws.amazon.com/iam/faqs/); existing S3 state requests/storage and existing telemetry retain their normal charges. No compute, ML endpoint, monitoring activation or new bucket is proposed. Approval would cover only the saved access plan, its isolated state/lock writes and read-only post-apply verification. A changed plan needs renewed review; live collection has a separate approval gate. Eight work packages remain open and research trials remain zero.
