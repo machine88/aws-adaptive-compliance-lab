@@ -1,0 +1,16 @@
+{
+  "version": "recovery-operator-v0.1",
+  "phase": "development",
+  "run_id": "REPLACE_WITH_RETAINED_RUN_ID",
+  "lock_root": "/absolute/private/locks",
+  "review_manifest_sha256": "REPLACE_WITH_INDEPENDENT_MANIFEST_PIN",
+  "source_sha256": "REPLACE_WITH_INTENT_SOURCE_PIN",
+  "recipient_sha256": "REPLACE_WITH_PUBLIC_RECIPIENT_PIN",
+  "commitment_sha256": "REPLACE_WITH_PREPARATION_COMMITMENT_PIN",
+  "helper": "/absolute/private/macos-decrypt-record",
+  "helper_sha256": "REPLACE_WITH_COMPILED_HELPER_PIN",
+  "recipient": "/absolute/private/existing-recipient",
+  "scratch": "/absolute/private/ciphertext-scratch",
+  "operator_source_sha256": "REPLACE_WITH_CURRENT_REVIEWED_OPERATOR_PIN",
+  "max_bytes": 4194304
+}

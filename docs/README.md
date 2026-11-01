@@ -6,7 +6,7 @@ AWS Adaptive Compliance Lab is an experimental comparison of native AWS monitori
 
 | Question | Start here |
 | --- | --- |
-| What is built and what remains? | [Implementation plan](implementation-plan.md) |
+| What is built and what remains? | [Progress map](project-status.md), [implementation plan](implementation-plan.md) |
 | Where does AI/ML fit? | [Research pipeline](../research/README.md), [ML design](ai-ml-pipeline.md) |
 | What is deployed versus paused? | [Prospective instrument review](prospective-instrument-review.md) |
 | How is infrastructure isolated? | [Infrastructure guide](../infra/README.md) |
@@ -32,6 +32,7 @@ Read these in order before proposing a live workflow:
 5. [Persistent local execution lock](scenario-execution-lock.md).
 6. [Encrypted recovery intent](recovery-intent.md).
 7. [Offline recovery reading and restoration review](recovery-review.md).
+8. [Preview-first local recovery operator](recovery-operator.md).
 
 These documents describe components and review requirements. They do not grant live-run approval. The lock is local and cooperative; a future driver and Terraform entry points still need integration.
 

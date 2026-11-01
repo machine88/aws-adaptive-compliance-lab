@@ -4,7 +4,7 @@
 
 ## Independent inputs
 
-The reader requires the expected run identifier, review-manifest/source/public-recipient fingerprints and the canonical hash of the preparation commitment. These pins must come from independently retained trusted records, not from whichever files the reader is currently inspecting. It also requires a trusted authenticated decryption callback with its own execution/output bounds. The existing dedicated Keychain helper remains a possible future operational boundary; this module does not invoke it or claim recovery-key availability.
+The reader requires the expected run identifier, review-manifest/source/public-recipient fingerprints and the canonical hash of the preparation commitment. These pins must come from independently retained trusted records, not from whichever files the reader is currently inspecting. It also requires a trusted authenticated decryption callback with its own execution/output bounds. The [preview-first local operator](recovery-operator.md) now connects the existing dedicated Keychain callback when explicitly invoked under a reviewed scope. No verification with actual retained artifacts has run in this development step; recovery-key availability is not claimed.
 
 The default and maximum cumulative byte budget is 4 MiB. It includes owner metadata, certificate, commitment, ciphertext, returned plaintext and post-decryption rereads. Invalid limits fail before ingestion. The caller's decryptor must itself bound memory and execution time; the reader can reject oversized returned plaintext but cannot undo allocation inside an arbitrary callback.
 
@@ -24,6 +24,6 @@ A candidate is not a closure certificate. Neither successful retention nor the e
 
 ## Remaining operational boundaries
 
-Before a live rehearsal, implement the trusted operational decryption connection, independent scoped AWS receipts and source clocks, freshness/deadline/credential coverage, actual protection/restoration verification and a reviewed closure/release procedure preserving the original recovery evidence. The lock remains cooperative and single-host; unrelated hosts, console users and unmodified Terraform commands are not excluded by this module. Existing live-run and research approval gates remain intact.
+Before a live rehearsal, validate the scoped Keychain connection using actual approved local artifacts, implement independent scoped AWS receipts and source clocks, freshness/deadline/credential coverage, actual protection/restoration verification and a reviewed closure/release procedure preserving the original recovery evidence. The lock remains cooperative and single-host; unrelated hosts, console users and unmodified Terraform commands are not excluded by this module. Existing live-run and research approval gates remain intact.
 
 Ten new synthetic cases cover actual CMS roundtrips with a disposable test recipient, external pin/ciphertext mismatches before decryption, duplicate fields, private permissions and links, owner/root changes during decryption, byte limits, weakened restoration metadata, encrypted candidate linkage and synchronization failure. The shared recipient fixture never accesses a real Keychain item, AWS credential or study observation.

@@ -60,3 +60,12 @@
 - After a code PR passes required checks, merge it and continue the next useful implementation step without asking for routine merge confirmation.
 - Report completed milestones and keep progressing; do not stop merely because a PR merged.
 - Preserve explicit approval of reviewed AWS deployment plans and live research/development capture. Routine continuation does not waive those gates.
+
+## Completion updates
+
+- End each completed work update with what was done and tested, how it helps the study, the next concrete step, and how much remains using verified milestones/open gates.
+- Maintain `docs/project-status.md` alongside behavior and milestone changes. Avoid unsupported completion percentages or calendar promises; distinguish engineering progress from research readiness.
+
+## Test scope
+
+- Add tests only for meaningful safety, evidence-integrity, integration or regression behavior. Reuse existing coverage and extend focused cases where possible. Do not add tests merely to mirror implementation, check trivial display output or increase test counts.
