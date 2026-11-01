@@ -21,30 +21,9 @@ AWS Adaptive Compliance Lab combines reproducible Terraform infrastructure, encr
 
 Solid arrows show implemented paths; dashed arrows show integration or activation still pending. This diagram summarizes retained deployment records, not a live account inventory.
 
-```mermaid
-flowchart TB
-    subgraph AWS["AWS research environment · Ohio"]
-        TRAIL["CloudTrail · logging enabled"] --> LOGS[("Private encrypted telemetry S3")]
-        CONFIG["AWS Config · recording paused"] -.-> LOGS
-        CONFIG -.-> HUB["Security Hub CSPM · no enabled standards"]
-        STATE[("Protected Terraform state · isolated keys and locks")]
-        SANDBOX[("Dedicated private versioned S3 sandbox")]
-        BUDGET["$100 monthly account-wide alert · not a spending cap"]
-    end
-    subgraph LOCAL["Local workstation"]
-        TF["Reviewed Terraform + scoped short-lived roles"] --> STATE
-        TF --> SANDBOX
-        READER["Scoped read-only collectors"] --> ARCHIVE[("Encrypted development evidence")]
-        ARCHIVE --> VERIFY["Source, receipt and timing verification"]
-        VERIFY -. "Validated feature release pending" .-> ML["Isolation Forest + bounded adaptation"]
-        ML --> MAP["Deterministic technical mapping"]
-        RUNNER["Scenario safety components · offline only"] -.-> SANDBOX
-    end
-    LOGS -->|"Scoped metadata; no log-body ingestion"| READER
-    TRAIL -->|"Management-event history"| READER
-    CODE["GitHub · source + credential-free validation"] --> TF
-    MAP -.-> EVAL["Future pilot, separate confirmatory study and R analysis"]
-```
+![AWS Adaptive Compliance Lab architecture: deployed AWS resources, paused monitoring, local evidence and ML, and planned research stages](docs/assets/architecture.svg)
+
+[Open the full-size architecture diagram](docs/assets/architecture.svg)
 
 The reader's current bucket allowlist excludes the sandbox. Neither CI nor the offline scenario components deploy infrastructure or run cloud experiments. The ML prototype runs locally; no SageMaker or Bedrock service is used.
 

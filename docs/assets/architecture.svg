@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1060" viewBox="0 0 1280 1060" role="img" aria-labelledby="title description">
+<title id="title">AWS Adaptive Compliance Lab architecture</title>
+<desc id="description">CloudTrail logs to private S3. AWS Config is paused and Security Hub CSPM has no enabled standards. Protected state and the sandbox are deployed. Local collectors encrypt development evidence. ML remains an offline prototype; live feature release, scenario integration, pilot, confirmatory study and R analysis are pending.</desc>
+<!-- Static project architecture: solid connectors are implemented; dashed connectors are pending. -->
+<defs>
+  <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill="none" stroke="#52637a" stroke-width="1.5"/></marker>
+  <style>
+    text {font-family:Arial,Helvetica,sans-serif;fill:#192c45}
+    .title {font-size:32px;font-weight:700}.subtitle{font-size:17px;fill:#52637a}
+    .group{font-size:21px;font-weight:700}.label{font-size:18px;font-weight:700}
+    .body{font-size:16px}.small{font-size:14px;fill:#52637a}.status{font-size:12px;font-weight:700;letter-spacing:1px}
+    .active{fill:#edf8f1;stroke:#b4d8c0}.paused{fill:#fff8e7;stroke:#e2cc91}
+    .local{fill:#eef4ff;stroke:#bdcfee}.pending{fill:#f3f5f8;stroke:#ccd3dd;stroke-dasharray:6 5}
+    .edge{fill:none;stroke:#52637a;stroke-width:2;marker-end:url(#arrow)}
+  </style>
+</defs>
+<rect width="1280" height="1060" fill="#ffffff"/>
+<rect width="1280" height="8" fill="#2461a8"/>
+<text x="40" y="62" class="title">AWS Adaptive Compliance Lab</text>
+<text x="40" y="92" class="subtitle">Current architecture · infrastructure, evidence and local machine learning</text>
+<g transform="translate(42 119)">
+ <circle cx="7" cy="0" r="6" fill="#398556"/><text x="21" y="5" class="small">Deployed / active</text>
+ <circle cx="196" cy="0" r="6" fill="#bf902b"/><text x="210" y="5" class="small">Paused / inactive</text>
+ <circle cx="389" cy="0" r="6" fill="#3f73b5"/><text x="403" y="5" class="small">Local software</text>
+ <path d="M570 0h28" stroke="#52637a" stroke-dasharray="5 4"/><text x="608" y="5" class="small">Pending integration</text>
+</g>
+<!-- AWS scope contains only resources represented in retained deployment records. -->
+<rect x="40" y="155" width="760" height="525" rx="18" fill="#fafbfd" stroke="#d4dce7"/>
+<text x="65" y="192" class="group">AWS research environment</text>
+<text x="65" y="218" class="small">Ohio · us-east-2 · scoped roles and short-lived sessions</text>
+<rect x="65" y="245" width="300" height="100" rx="10" class="active"/>
+<text x="83" y="269" class="status" style="fill:#267342">LOGGING ENABLED</text>
+<text x="83" y="296" class="label">CloudTrail</text>
+<text x="83" y="322" class="body">Management events + digests</text>
+<path d="M365 295H445" class="edge"/>
+<rect x="445" y="245" width="330" height="100" rx="10" class="active"/>
+<text x="463" y="269" class="status" style="fill:#267342">DEPLOYED</text>
+<text x="463" y="296" class="label">Telemetry S3</text>
+<text x="463" y="322" class="body">Private · encrypted · versioned</text>
+<rect x="65" y="365" width="300" height="100" rx="10" class="active"/>
+<text x="83" y="389" class="status" style="fill:#267342">DEPLOYED</text>
+<text x="83" y="416" class="label">Terraform state S3</text>
+<text x="83" y="442" class="body">Isolated state keys + locks</text>
+<rect x="445" y="365" width="330" height="100" rx="10" class="active"/>
+<text x="463" y="389" class="status" style="fill:#267342">DEPLOYED</text>
+<text x="463" y="416" class="label">Dedicated S3 sandbox</text>
+<text x="463" y="442" class="body">Private · encrypted · versioning ON</text>
+<rect x="65" y="485" width="300" height="95" rx="10" class="paused"/>
+<text x="83" y="509" class="status" style="fill:#936719">RECORDING PAUSED</text>
+<text x="83" y="536" class="label">AWS Config</text>
+<text x="83" y="561" class="body">Recorder and rules provisioned</text>
+<path d="M365 532H445" class="edge" stroke-dasharray="6 5"/>
+<rect x="445" y="485" width="330" height="95" rx="10" class="paused"/>
+<text x="463" y="509" class="status" style="fill:#936719">NO ENABLED STANDARDS</text>
+<text x="463" y="536" class="label">Security Hub CSPM</text>
+<text x="463" y="561" class="body">Monitoring activation pending</text>
+<text x="65" y="615" class="body">Budget: $100/month account-wide alerts · no automatic cutoff</text>
+<text x="65" y="644" class="small">Sandbox current listing empty; older versions/uploads unverified live.</text>
+<!-- Local implementation is separate from cloud monitoring and future study readiness. -->
+<rect x="835" y="155" width="405" height="525" rx="18" fill="#fafbfd" stroke="#d4dce7"/>
+<text x="860" y="192" class="group">Local workstation</text>
+<text x="860" y="218" class="small">GitHub source + credential-free CI</text>
+<rect x="860" y="245" width="355" height="80" rx="10" class="local"/>
+<text x="878" y="275" class="label">Scoped read-only collectors</text>
+<text x="878" y="302" class="body">Metadata + management-event history</text>
+<path d="M775 285H860" class="edge"/>
+<text x="795" y="273" class="small">Read</text>
+<path d="M1038 325V355" class="edge"/>
+<rect x="860" y="355" width="355" height="100" rx="10" class="local"/>
+<text x="878" y="383" class="label">Encrypted evidence + verification</text>
+<text x="878" y="410" class="body">Private archives · source/timing checks</text>
+<text x="878" y="436" class="small">Local evidence key protected by Keychain</text>
+<path d="M1038 455V505" class="edge" stroke-dasharray="6 5"/>
+<text x="860" y="487" class="small">Validated live feature release still pending</text>
+<rect x="860" y="505" width="355" height="125" rx="10" class="local"/>
+<text x="878" y="529" class="status" style="fill:#315f9a">OFFLINE PROTOTYPE</text>
+<text x="878" y="556" class="label">Isolation Forest</text>
+<text x="878" y="584" class="body">Bounded adaptation</text>
+<text x="878" y="609" class="body">Deterministic compliance mapping</text>
+<text x="860" y="656" class="small">No SageMaker or Bedrock service is used.</text>
+<!-- Future steps do not imply approval, collected trials, or model readiness. -->
+<rect x="40" y="720" width="1200" height="235" rx="18" fill="#fafbfd" stroke="#d4dce7"/>
+<text x="65" y="758" class="group">Next: validated experiments and analysis</text>
+<rect x="65" y="785" width="340" height="120" rx="10" class="pending"/>
+<text x="83" y="815" class="label">Controlled scenario runner</text>
+<text x="83" y="843" class="body">Pre-state · lock · recovery intent</text>
+<text x="83" y="870" class="body">Change → observe → restore</text>
+<text x="83" y="893" class="small">Safety components implemented offline</text>
+<path d="M405 845H455" class="edge" stroke-dasharray="6 5"/>
+<rect x="455" y="785" width="320" height="120" rx="10" class="pending"/>
+<text x="473" y="815" class="label">Instrument validation + pilot</text>
+<text x="473" y="843" class="body">Independent catalog + ground truth</text>
+<text x="473" y="870" class="body">Shared windows · paired predictions</text>
+<path d="M775 845H825" class="edge" stroke-dasharray="6 5"/>
+<rect x="825" y="785" width="390" height="120" rx="10" class="pending"/>
+<text x="843" y="815" class="label">Separate confirmatory study</text>
+<text x="843" y="843" class="body">Frozen protocol + justified sample size</text>
+<text x="843" y="870" class="body">R analysis · evidence-backed findings</text>
+<text x="65" y="933" class="small">Approval required before live scenarios. Development, pilot and confirmatory evidence stay separate.</text>
+<text x="40" y="994" class="body">Current boundary: no study model trained · zero pilot/confirmatory research trials</text>
+<text x="40" y="1024" class="small">Deployment status summarizes retained records, not a live inventory. Reader bucket scope excludes the sandbox.</text>
+</svg>

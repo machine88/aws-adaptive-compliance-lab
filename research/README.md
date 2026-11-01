@@ -4,17 +4,16 @@ This package contains the offline research contracts and development instrument 
 
 ## How a future comparison works
 
-```mermaid
-flowchart LR
-    SOURCE["Equivalent retained AWS evidence"] -.-> BASE["Native baseline adapter"]
-    SOURCE -.-> FEATURES["Validated numeric features"]
-    FEATURES --> FOREST["Isolation Forest score"]
-    FOREST --> MAP["Deterministic technical mapping"]
-    SOURCE -. "Observed technical facts" .-> MAP
-    BASE --> PAIR["Retain both prediction receipts"]
-    MAP --> PAIR
-    PAIR --> JOIN["Later evaluation"]
-    TRUTH["Separately authored ground truth"] --> JOIN
+```text
+Equivalent retained AWS evidence
+    ├── Native baseline adapter ───────────────────┐
+    └── Numeric features → Isolation Forest       │
+            + observed technical facts            │
+            → deterministic mapping ──────────────┤
+                                                  ↓
+                                      Save both predictions
+                                                  ↓
+Separate ground truth ──────────────────→ Later evaluation
 ```
 
 The diagram is the intended paired design. Live feature release, baseline fusion and the formal controller remain incomplete. An anomaly score indicates unusualness, not proof of a control violation. The mapper preserves unknown/instrumentation-failure outcomes when evidence is insufficient.
