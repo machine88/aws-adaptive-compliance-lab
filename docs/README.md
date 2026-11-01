@@ -17,6 +17,7 @@ AWS Adaptive Compliance Lab is an experimental comparison of native AWS monitori
 - [Read-only collectors](read-only-collectors.md) and [event-history collector](event-history-collector.md): bounded source access and encrypted retention.
 - [Native capture](native-capture.md) and [native verification](native-verification.md): acquisition, closure and independent replay.
 - [Sampling contract](sampling-contract.md) and [timing/censoring](timing-and-censoring.md): distinguish scheduled, requested, received, missing and late evidence.
+- [Archive durability](archive-durability.md): acknowledge encrypted records only after local file/directory synchronization.
 - [Archive ingestion](archive-ingestion.md), [state frames](state-frames.md) and [feature bundles](feature-bundle.md): offline transformation boundaries.
 - [Keychain ingestion](keychain-ingestion.md): local evidence decryption protections, not an AWS credential store.
 
