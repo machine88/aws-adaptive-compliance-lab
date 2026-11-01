@@ -18,7 +18,7 @@ def observer_requests():
     """
     requests = []
     # Current objects serve both predicates; do not issue that listing twice.
-    for operation in sorted(OPERATIONS | set(LISTINGS)):
+    for operation in ["get_bucket_location", "get_bucket_tagging"] + sorted((OPERATIONS | set(LISTINGS)) - {"get_bucket_location", "get_bucket_tagging"}):
         params = {"Bucket": BUCKET, "ExpectedBucketOwner": ACCOUNT}
         if operation in LISTINGS:
             params[LISTINGS[operation][0]] = 1000
