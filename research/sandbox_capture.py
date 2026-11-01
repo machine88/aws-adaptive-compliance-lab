@@ -19,13 +19,14 @@ def capture_source_sha256():
     """Fingerprint maintained capture dependencies for an independently reviewed scope.
 
     Inputs:
-        None: Reads regular research Python files and the AWS dependency declaration.
+        None: Reads regular research Python files, capture/operator scripts and AWS dependencies.
     Outputs:
         str: Canonical path/content hash; rejects symlinks and performs no AWS or credential IO.
             Does not authenticate installed libraries, Python, the OS or human approval.
     """
     root = Path(__file__).resolve().parents[1]
-    files = list((root / "research").glob("*.py")) + [root / "requirements-aws.txt"]
+    files = list((root / "research").glob("*.py")) + [root / name for name in (
+        "requirements-aws.txt", "scripts/capture_sandbox.py", "scripts/sandbox_capture_worker.py", "scripts/review_recovery.py")]
     if any(file.is_symlink() or not file.is_file() for file in files):
         raise ValueError("Regular maintained capture source required")
     return canonical_sha256({str(file.relative_to(root)): hashlib.sha256(file.read_bytes()).hexdigest()
@@ -95,7 +96,44 @@ class SendBudget:
         self.sent += 1
 
 
-def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns=time.monotonic_ns, clock=utc_now):
+
+def invoke_sandbox_read(client, operation, request):
+    """Dispatch only the eleven declared metadata/listing operations using explicit SDK calls.
+
+    Inputs:
+        client: Scoped S3 SDK client configured by capture_sandbox.
+        operation: One operation from the fixed sandbox observation manifest.
+        request: Exact parameters already supplied by that manifest.
+    Outputs:
+        dict: SDK response; errors propagate for encrypted capture-level retention. Explicit calls
+            support deterministic IAM analysis and reject all mutation/body-read operations.
+    """
+    if operation == "get_bucket_location":
+        return client.get_bucket_location(**request)
+    if operation == "get_bucket_tagging":
+        return client.get_bucket_tagging(**request)
+    if operation == "get_bucket_encryption":
+        return client.get_bucket_encryption(**request)
+    if operation == "get_bucket_ownership_controls":
+        return client.get_bucket_ownership_controls(**request)
+    if operation == "get_bucket_versioning":
+        return client.get_bucket_versioning(**request)
+    if operation == "get_bucket_policy":
+        return client.get_bucket_policy(**request)
+    if operation == "get_bucket_policy_status":
+        return client.get_bucket_policy_status(**request)
+    if operation == "get_public_access_block":
+        return client.get_public_access_block(**request)
+    if operation == "list_objects_v2":
+        return client.list_objects_v2(**request)
+    if operation == "list_object_versions":
+        return client.list_object_versions(**request)
+    if operation == "list_multipart_uploads":
+        return client.list_multipart_uploads(**request)
+    raise ValueError("Operation outside sandbox read manifest")
+
+
+def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns=time.monotonic_ns, clock=utc_now, operator_scope_sha256=None):
     """Retain one bounded encrypted observation using already-approved development scope.
 
     Inputs:
@@ -106,6 +144,8 @@ def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns
         approved_scope_sha256: Independently reviewed scope hash; supplying it is not human approval.
         monotonic_ns: Injectable monotonic nanosecond clock for between-operation deadline checks.
         clock: Injectable UTC string clock for supplied receipt envelopes.
+        operator_scope_sha256: Optional independently reviewed enclosing operator fingerprint,
+            retained inside the encrypted capture scope to bind receipts to that run.
     Outputs:
         dict: Minimal completion summary after encrypted receipts, pre-state and completion record.
             Creates only ciphertext through archive; performs at most twelve planned SDK calls.
@@ -115,6 +155,8 @@ def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns
     """
     # Reject stale or edited scope and recipient before constructing any SDK clients.
     require_sha256(approved_scope_sha256)
+    if operator_scope_sha256 is not None:
+        require_sha256(operator_scope_sha256)
     if not isinstance(scope, dict) or canonical_sha256(scope) != canonical_sha256(capture_scope(capture_source_sha256(), scope.get("recipient_sha256"))) or canonical_sha256(scope) != approved_scope_sha256:
         raise ValueError("Exact reviewed capture scope and current source required")
     if archive.timeout_seconds != 5 or hashlib.sha256(archive.cert.read_bytes()).hexdigest() != scope["recipient_sha256"] or archive.receipts:
@@ -124,7 +166,8 @@ def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns
     attempted, started, before = False, None, None
     guards = []
     try:
-        archive.write({"kind": "sandbox_capture_scope", "scope": scope, "scope_sha256": approved_scope_sha256})
+        archive.write({"kind": "sandbox_capture_scope", "scope": scope, "scope_sha256": approved_scope_sha256,
+                       "operator_scope_sha256": operator_scope_sha256})
         config = Config(connect_timeout=3, read_timeout=10, retries={"total_max_attempts": 1, "mode": "standard"},
                         ignore_configured_endpoint_urls=True, proxies={}, use_fips_endpoint=False,
                         use_dualstack_endpoint=False, s3={"use_accelerate_endpoint": False})
@@ -146,7 +189,7 @@ def capture_sandbox(session, archive, scope, approved_scope_sha256, monotonic_ns
             started, before = clock(), monotonic_ns()
             try:
                 attempted = True
-                response = getattr(client, active_request["operation"])(**active_request["request"])
+                response = client.get_caller_identity() if active_request["service"] == "sts" else invoke_sandbox_read(client, active_request["operation"], active_request["request"])
             finally:
                 guard.active = False
             receipt = {**active_request, "started_at": started, "finished_at": clock(),

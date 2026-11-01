@@ -12,7 +12,7 @@ from botocore.stub import Stubber
 
 from research.aws_reader import EncryptedArchive
 from research.catalog import canonical_sha256
-from research.sandbox_capture import SendBudget, capture_sandbox, capture_scope, capture_source_sha256
+from research.sandbox_capture import SendBudget, capture_sandbox, capture_scope, capture_source_sha256, invoke_sandbox_read
 from tests.crypto_fixtures import synthetic_recipient
 from tests.test_sandbox_observer import observation
 
@@ -132,15 +132,21 @@ class SandboxCaptureTests(unittest.TestCase):
                                 self.assertEqual(records[-1]["response"]["Error"]["Code"], "AccessDenied")
                     self.assertFalse(any(file.suffix in (".json", ".txt") for file in archive.root.iterdir()))
 
-    def test_wire_guard_blocks_redirect_retry_and_expired_send(self):
-        """Prevent extra wire attempts even when SDK retry/redirect handlers request them.
+    def test_wire_and_operation_guards_reject_widening(self):
+        """Prevent extra wire attempts and reject mutations or object-body reads.
 
         Inputs:
             self: Test instance invoking the registered guard contract without a network.
         Outputs:
-            None; asserts sends require an active invocation and an unexpired one-attempt budget.
+            None; asserts sends require an active unexpired one-attempt budget, and dispatch never
+            invokes a client for operations outside the reviewed metadata/listing set.
         """
         clock = Mock(return_value=0)
+        client = Mock()
+        for operation in ("get_object", "put_bucket_versioning", "delete_object"):
+            with self.assertRaises(ValueError):
+                invoke_sandbox_read(client, operation, {})
+        self.assertEqual(client.mock_calls, [])
         guard = SendBudget(100, clock)
         with self.assertRaises(ValueError):
             guard.before_send(None)
