@@ -176,24 +176,35 @@ def worker_environment():
     return env
 
 
-def bounded_worker(command, descriptor, timeout_seconds):
+def bounded_worker(command, descriptor, timeout_seconds, *, inherit_supervisor_group=False):
     """Run a silent isolated worker and kill its process group on timeout or cancellation.
 
     Inputs:
         command: Trusted explicit argv for the pinned Python/worker, never shell text.
         descriptor: JSON-compatible private scope/output descriptor passed through stdin only.
         timeout_seconds: Reviewed bounded subprocess runtime.
+        inherit_supervisor_group: Keep a nested child in this process group only when this
+            caller is already its isolated session/group leader; default creates a new session.
     Outputs:
         str: success, failed, fatal or timeout; reaps the child and discards stdout/stderr.
-            Cancellation kills the same worker group then propagates; no raw output is retained.
+            Default cancellation kills the worker group then propagates. Nested mode kills only
+            its immediate child; the outer supervisor owns group-wide termination. No raw output
+            is retained. This mode never targets the invoking application's process group.
     """
+    if type(inherit_supervisor_group) is not bool:
+        raise ValueError("Explicit boolean process-group mode required")
+    if inherit_supervisor_group and (os.getsid(0) != os.getpid() or os.getpgrp() != os.getpid()):
+        raise ValueError("Nested workers require an isolated session/group leader")
     process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL,
-                               stderr=subprocess.DEVNULL, start_new_session=True, env=worker_environment())
+                               stderr=subprocess.DEVNULL, start_new_session=not inherit_supervisor_group, env=worker_environment())
     try:
         process.communicate(json.dumps(descriptor, allow_nan=False).encode(), timeout=timeout_seconds)
     except BaseException as error:
         try:
-            os.killpg(process.pid, signal.SIGKILL)
+            if inherit_supervisor_group:
+                process.kill()
+            else:
+                os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError:
             pass
         process.communicate()

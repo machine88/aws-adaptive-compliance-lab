@@ -5,6 +5,7 @@ import subprocess
 import copy
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -228,8 +229,18 @@ class SandboxOperatorTests(unittest.TestCase):
             None: Asserts encrypted timeout outcome, no completion claim and profile rejection
             without resolving credentials or issuing a service request.
         """
-        with patch("research.sandbox_operator.bounded_worker", return_value="timeout"):
-            result = run_sandbox_operator(self.scope, canonical_sha256(self.scope))
+        # Invalid nesting must fail before creating a run directory or journal.
+        with patch("research.sandbox_operator.os.getsid", return_value=-1), \
+                patch("research.sandbox_operator.bounded_worker") as worker:
+            with self.assertRaises(ValueError):
+                run_sandbox_operator(self.scope, canonical_sha256(self.scope), inherit_supervisor_group=True)
+            worker.assert_not_called()
+        self.assertFalse((self.root / "run").exists())
+        with patch("research.sandbox_operator.os.getsid", return_value=os.getpid()), \
+                patch("research.sandbox_operator.os.getpgrp", return_value=os.getpid()), \
+                patch("research.sandbox_operator.bounded_worker", return_value="timeout") as worker:
+            result = run_sandbox_operator(self.scope, canonical_sha256(self.scope), inherit_supervisor_group=True)
+            self.assertEqual(worker.call_args.kwargs, {"inherit_supervisor_group": True})
         self.assertEqual(result["worker_status"], "timeout")
         self.assertFalse(result["live_execution_allowed"])
         journal = decrypt_records(self.root / "run/journal", self.binary, self.cert, self.key)

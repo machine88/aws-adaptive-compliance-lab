@@ -433,3 +433,48 @@ class NativeTests(unittest.TestCase):
         pid = int(pid_file.read_text())
         state = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)], capture_output=True, text=True).stdout.strip()
         self.assertTrue(not state or state.startswith("Z"))
+
+
+    def test_nested_supervisor_timeout_kills_observer_descendant(self):
+        """Keep a nested worker inside the outer isolated group so its deadline kills both.
+
+        Inputs:
+            self: Test instance with private temporary storage for disposable process PID markers.
+        Outputs:
+            None: Asserts the real nested process shares the outer group and stops after timeout;
+                no AWS, credentials, Keychain item or operational lock is used.
+        """
+        pid_file = self.parent / "nested-worker.pid"
+        child = ("import os,time; from pathlib import Path; "
+                 f"Path({str(pid_file)!r}).write_text(str(os.getpid())+','+str(os.getpgrp())); "
+                 "time.sleep(20)")
+        # The outer supervisor creates a session; its inner observer must not detach from it.
+        supervisor = ("import sys; "
+                      f"sys.path.insert(0, {str(Path(__file__).resolve().parents[1])!r}); "
+                      "from research.native_capture import bounded_worker; "
+                      f"bounded_worker([sys.executable,'-I','-c',{child!r}], {{}}, 15, "
+                      "inherit_supervisor_group=True)")
+        result = bounded_worker([sys.executable, "-I", "-c", supervisor], {}, 3)
+        self.assertEqual(result, "timeout")
+        self.assertTrue(pid_file.exists())
+        pid, group = map(int, pid_file.read_text().split(","))
+        self.assertNotEqual(pid, group)
+        state = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
+                               capture_output=True, text=True).stdout.strip()
+        self.assertTrue(not state or state.startswith("Z"))
+
+    def test_nested_mode_rejects_unisolated_caller_before_spawn(self):
+        """Reject inherited group mode from an ordinary application process before child creation.
+
+        Inputs:
+            self: Test instance using mocked unisolated process identifiers; no child is started.
+        Outputs:
+            None: Asserts failure precedes Popen and malformed mode values are rejected.
+        """
+        with patch("research.native_capture.os.getsid", return_value=-1), \
+                patch("research.native_capture.subprocess.Popen") as spawn:
+            with self.assertRaises(ValueError):
+                bounded_worker([sys.executable], {}, 1, inherit_supervisor_group=True)
+            with self.assertRaises(ValueError):
+                bounded_worker([sys.executable], {}, 1, inherit_supervisor_group=1)
+        spawn.assert_not_called()
