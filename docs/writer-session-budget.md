@@ -9,7 +9,7 @@ expiration against a fixed development transport and recovery reserve. It never
 reads keys, tokens, credentials, profiles, environment variables or private files.
 
 ```text
-Future trusted adapter + retained provider evidence       NOT IMPLEMENTED
+Disabled session broker + retained provider metadata      SDK-STUB TESTED
                          |
 Nonsecret expiration metadata + independently retained fingerprint
                          |
@@ -75,8 +75,11 @@ extra credential-like fields, stale and inconsistent clocks, expired/short or
 implausible lifetimes, the exact conservative threshold and later reassessment.
 They use synthetic metadata without AWS credentials or real waiting.
 
-Next: build the trusted session-evidence adapter and bind the actual session used
-for requests, its expiration source, encrypted retention and same-process clocks.
+The [disabled session broker](writer-session.md) now binds a fixed role response
+to one in-memory SDK session, encrypted metadata and continuously checked clocks
+in SDK-stub tests. No actual session has been opened through it. Next: integrate
+that session and its evidence with the writer and live admission without treating
+this planning result as a permit.
 Then integrate fresh observer receipts, held intent/lock, supervision and
 independent restoration/closure. Access deployment approval does not authorize a
 new capture, versioning write or rehearsal. The [writer transport](sandbox-writer.md)

@@ -32,6 +32,7 @@ The diagram is the intended paired design. Live feature release, baseline fusion
 | `recovery_operator.py` | Review a private scope and explicitly connect the existing Keychain callback | Preview default; actual retained-artifact verification and live restoration still pending |
 | `recovery_review.py` | Bounded private intent reading and encrypted restoration candidates | Supplied consistency only; no verified live restoration or automatic unlock |
 | `recovery_intent.py` | Retain encrypted pre-state and fixed recovery actions under a matching lock | Preparation only; no verified live identity, execution or recovery-aware release |
+| `writer_session.py` | Fixed opt-in role request, static SDK session and retained nonsecret expiration/identity metadata | SDK-stub tested; no live writer integration or automatic refresh |
 | `writer_coverage.py` | Reject insufficient or stale supplied session timing metadata | Offline planning only; no provider proof or live admission |
 | `scenario_lock.py` | Persistent exclusion for cooperating local runs | Not distributed; no live/Terraform integration yet |
 
