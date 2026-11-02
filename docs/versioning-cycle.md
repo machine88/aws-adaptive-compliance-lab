@@ -94,9 +94,10 @@ recipient. The fixed 1,800-second contract preserves proposal requirement M13;
 synthetic completion is not a validated research timing result.
 
 The [disabled SDK transport and generated access root](sandbox-writer.md) are now
-implemented separately and tested with SDK stubs; they have not been deployed or
-connected to this synthetic executor. Next: review the saved access plan, validate live
-credentials/fresh source receipts and process recovery, integrate the lock and
+implemented separately and tested with SDK stubs. The separately approved access
+plan is now deployed and independently verified; the SDK transport remains
+disabled and disconnected from this synthetic executor. Next: validate live
+credential coverage, fresh source receipts and process recovery, integrate the lock and
 both monitor collectors, then review the exact live rehearsal plan. No role,
 policy, monitoring activation or cloud mutation is authorized by merging this code.
 The separate read-only retirement path cannot close a future mutating cycle.
