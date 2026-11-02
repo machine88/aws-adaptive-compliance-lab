@@ -1,0 +1,13 @@
+{
+  "version": "writer-session-policy-provenance-v0.1",
+  "tool": "iam-policy-autopilot",
+  "tool_version": "0.3.0",
+  "source_sha256": {
+    "research/writer_session.py": "87079474eff86bbff2ff39d25afedf00de06afa3fb63c6f21f9f3a35119d8ad3"
+  },
+  "analysis_canonical_sha256": "d911b969d8c7663ff66c3aa0a4bbf71e64550e71bd386dc55709a1c22f4e70f4",
+  "analysis_retained_privately": true,
+  "review_only": true,
+  "policy_attachment_approved": false,
+  "aws_applied": false
+}

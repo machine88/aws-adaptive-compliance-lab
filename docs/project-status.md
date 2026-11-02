@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and approved, deployed and independently verified bounded writer access; offline session timing budget evaluator; disabled same-process session broker | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and approved, deployed and independently verified bounded writer access; offline session timing budget evaluator; disabled same-process session broker; explicit bound-writer integration and full development-case package tested offline | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -45,9 +45,9 @@ synthetic offline validation; no actual restoration candidate or mutating-run cl
 has occurred. A candidate consistency report does not prove restoration or
 permit unlock.
 
-Next is fresh independent receipts and a live
-adapter for the offline driver, followed by reviewed mutating-run closure/release
-and an approved rehearsal. Source freshness, concurrent-writer exclusion, trigger
+The development case now composes fresh independent receipts and live adapters
+under explicit approval; its actual execution and reviewed mutating-run
+closure/release remain pending. The offline driver stays synthetic-only. Source freshness, concurrent-writer exclusion, trigger
 attribution, monitoring/ML readiness and formal-trial authorization remain open.
 All eight work packages remain open; pilot/confirmatory trials and study-model
 training have not started.
@@ -77,9 +77,8 @@ mandatory boundary, both policy documents, one attachment and no inline policies
 the follow-up plan reported no changes. Source defaults remain disabled, while
 approved active inputs are private and must remain enabled for maintenance. No
 writer profile, bucket transition, new capture, monitoring activation or rehearsal
-was performed. These access checks are administrative evidence only. Next:
-integrate live admission, independent freshness/credential checks and supervised
-recovery/closure before requesting a separately reviewed rehearsal. All eight
+was performed. These access checks are administrative evidence only. The current development-case package now integrates these engineering checks
+and supervised recovery/closure; its actual live pass remains separately reviewed. All eight
 work packages remain open; pilot and confirmatory trials remain zero.
 
 
@@ -87,9 +86,8 @@ The [session timing budget evaluator](writer-session-budget.md) now rejects stal
 replayed, inconsistent or insufficient supplied session metadata before a future
 live admission decision. It reserves the full transport lifetime, extra recovery
 time and clock allowance. This is offline arithmetic only: no provider evidence
-is authenticated and all credential/live/restoration gates remain false. Next is
-a trusted adapter binding the actual request session to retained expiration and
-same-process clocks, followed by observer/supervision/closure integration. No new
+is authenticated and all credential/live/restoration gates remain false. The bound-session adapter and development case now provide the next composed
+engineering path; actual live evidence remains pending approval. No new
 AWS operation, capture or research trial occurred in this implementation step.
 
 
@@ -97,8 +95,19 @@ The [bound temporary-session broker](writer-session.md) now constructs one stati
 SDK session from a fixed AssumeRole response, checks its actual identity and
 retains only allowlisted nonsecret expiration/identity/request metadata. SDK-stub
 and disposable-CMS tests cover identity, clocks, budget, setup failure and secret
-exclusion. It is disabled by default and not yet accepted by the writer's
-profile-only validator. No live authentication or scenario run occurred. Next:
-connect the bound session and retained evidence to writer admission, fresh
-observer state, held lock/intent and supervised recovery, then review a live
-rehearsal. All eight packages remain open; pilot/confirmatory trials remain zero.
+exclusion. It remains disabled by default and now connects through explicit bound-session
+writer mode without bypassing profile validation. No live authentication or
+scenario run occurred. The complete development case awaits its concrete review
+and approval. All eight packages remain open; pilot/confirmatory trials remain zero.
+
+
+The [first development case package](development-versioning-experiment.md) now
+composes the broker/writer, original locked preparation, independent attributed
+versioning readback, one fixed 1,800-second window, bounded Enabled recovery, full
+protected-empty post-state and encrypted candidate readback. An end-to-end
+SDK-stub/CMS case exercises the positive path; a stale-admission case retains a
+negative result without any write. No actual case has run. Next is the concrete
+private scope review and explicit live approval, then a truthful assignment
+summary of the actual engineering outcome. No native/AI comparison or study-model
+training occurs in this case. All eight packages remain open; pilot/confirmatory
+trials remain zero.

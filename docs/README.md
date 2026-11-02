@@ -52,3 +52,5 @@ Some historical documents use the original dissertation project name. Existing A
 - [Versioning transport and deployed writer access](sandbox-writer.md): fixed SDK requests, encrypted receipts, generated permissions and deployment/rehearsal gates.
 
 - [Session timing budget](writer-session-budget.md) and [bound temporary session](writer-session.md): offline timing evaluation and disabled same-session expiration/identity broker before live integration.
+
+- [First development experiment](development-versioning-experiment.md): reviewed one-change/readback/30-minute-window/restoration package and assignment reporting limits; live approval pending.

@@ -5,7 +5,7 @@
   "account": "653464153304",
   "region": "us-east-2",
   "source_sha256": {
-    "research/sandbox_writer.py": "55ecfe10ea0e1c6099ee3779ce0dd50eacef4424eda7b3005aafbb16d90b72ba"
+    "research/sandbox_writer.py": "29e2c853faf9bccfb21835fbe38202c484ef4facd75726f440cf7a9b33d505d4"
   },
   "terraform_context": "infra/sandbox",
   "generated_policy_canonical_sha256": "1a685fe50774da61a30a7991f5f85d65aa0386a549410c964739b7ecb72b57aa",

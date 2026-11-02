@@ -16,12 +16,13 @@ from research.sandbox_capture import SendBudget, utc_now
 from research.sandbox_emptiness import ACCOUNT, BUCKET, REGION
 from research.scenario_lock import validate_run_id
 from research.timing import require_sha256
+from research.writer_session import BoundWriterSession
 
-VERSION = "sandbox-versioning-writer-v0.1"
+VERSION = "sandbox-versioning-writer-v0.2"
 ROLE = PROFILE = "dissertation-sandbox-versioning"
 KEYS = {"version", "phase", "account", "region", "bucket", "profile", "run_id", "source_sha256",
         "recipient_sha256", "intent_sha256", "intent_review_sha256", "intent_source_sha256",
-        "enable_writes", "mode", "lifetime_seconds", "max_suspensions", "max_restorations"}
+        "enable_writes", "mode", "session_mode", "lifetime_seconds", "max_suspensions", "max_restorations"}
 
 
 def writer_source_sha256():
@@ -40,7 +41,7 @@ def writer_source_sha256():
 
 
 def writer_scope(run_id, recipient_sha256, intent_sha256, intent_review_sha256, intent_source_sha256,
-                 enable_writes=False, mode="change_and_restore"):
+                 enable_writes=False, mode="change_and_restore", session_mode="profile"):
     """Build a reviewable fixed-target scope with execution disabled unless explicitly selected.
 
     Inputs:
@@ -51,6 +52,7 @@ def writer_scope(run_id, recipient_sha256, intent_sha256, intent_review_sha256, 
         intent_source_sha256: Independent historical intent source fingerprint.
         enable_writes: Explicit boolean; False is the safe default and cannot initialize a writer.
         mode: change_and_restore or separately reviewed recovery_only; neither is consent proof.
+        session_mode: profile by default, or independently reviewed bound_session; never inferred.
     Outputs:
         dict: Current source-bound fixed account/bucket/role scope; no SDK session or output creation.
     """
@@ -58,7 +60,7 @@ def writer_scope(run_id, recipient_sha256, intent_sha256, intent_review_sha256, 
         "bucket": BUCKET, "profile": PROFILE, "run_id": run_id, "source_sha256": writer_source_sha256(),
         "recipient_sha256": recipient_sha256, "intent_sha256": intent_sha256,
         "intent_review_sha256": intent_review_sha256, "intent_source_sha256": intent_source_sha256,
-        "enable_writes": enable_writes, "mode": mode, "lifetime_seconds": 2400,
+        "enable_writes": enable_writes, "mode": mode, "session_mode": session_mode, "lifetime_seconds": 2400,
         "max_suspensions": 1, "max_restorations": 3}
     preview_writer_scope(scope)
     return scope
@@ -79,7 +81,7 @@ def preview_writer_scope(scope):
     validate_run_id(scope["run_id"])
     for name in ("source_sha256", "recipient_sha256", "intent_sha256", "intent_review_sha256", "intent_source_sha256"):
         require_sha256(scope[name])
-    if type(scope["enable_writes"]) is not bool or scope["mode"] not in {"change_and_restore", "recovery_only"}:
+    if type(scope["enable_writes"]) is not bool or scope["mode"] not in {"change_and_restore", "recovery_only"} or scope["session_mode"] not in {"profile", "bound_session"}:
         raise ValueError("Explicit writer enable flag and bounded mode required")
     for name, value in (("lifetime_seconds", 2400), ("max_suspensions", 1), ("max_restorations", 3)):
         if type(scope[name]) is not int or scope[name] != value:
@@ -110,7 +112,7 @@ class BoundedVersioningWriter:
     """Single-thread transport only; does not provide live admission, rollback or source attestation."""
 
     def __init__(self, scope, approved_scope_sha256, intent, archive, session_factory=None,
-                 monotonic_ns=time.monotonic_ns, clock=utc_now):
+                 monotonic_ns=time.monotonic_ns, clock=utc_now, bound_session=None, prechange_check=None):
         """Validate opt-in, intent and fresh encryption before checking the dedicated writer identity.
 
         Inputs:
@@ -121,6 +123,11 @@ class BoundedVersioningWriter:
             session_factory: Optional offline-test constructor; None uses the exact named boto3 profile.
             monotonic_ns: Integer local nanosecond clock; guards cooperative lifetime and wire starts.
             clock: UTC timestamp callback for encrypted transport receipts only.
+            bound_session: Exact initialized BoundWriterSession for explicitly scoped bound_session
+                mode only; profile mode refuses it. A separate session factory cannot be mixed in.
+            prechange_check: Trusted no-argument admission checker required for bound-session
+                change_and_restore mode. Must raise on stale evidence/changed lock; its return
+                value is ignored. This callable is not an independent attestation or consent.
         Outputs:
             None: With explicit opt-in only, creates fixed regional clients, makes one identity call
                 and retains its encrypted response. No S3 write occurs during construction. Wrong
@@ -131,24 +138,36 @@ class BoundedVersioningWriter:
         preview = preview_writer_scope(scope)
         if preview["scope_sha256"] != approved_scope_sha256 or writer_source_sha256() != scope["source_sha256"] or scope["enable_writes"] is not True:
             raise ValueError("Current independently reviewed enabled writer scope required")
+        if scope["session_mode"] == "bound_session":
+            if type(bound_session) is not BoundWriterSession or session_factory is not None or (scope["mode"] == "change_and_restore" and not callable(prechange_check)):
+                raise ValueError("Exact bound session without alternate factory required")
+        elif bound_session is not None:
+            raise ValueError("Profile mode cannot accept a bound session")
         intent = copy.deepcopy(intent)
         if verify_recovery_intent(intent, scope["run_id"], scope["intent_review_sha256"], scope["intent_source_sha256"], scope["recipient_sha256"]) != scope["intent_sha256"]:
             raise ValueError("Authenticated retained intent differs from independent pin")
         if archive.receipts or archive.timeout_seconds != 5 or hashlib.sha256(Path(archive.cert).read_bytes()).hexdigest() != scope["recipient_sha256"]:
             raise ValueError("Fresh bounded encrypted archive with reviewed recipient required")
         self._scope, self._intent, self._archive = copy.deepcopy(scope), intent, archive
+        self._prechange_check = prechange_check
         self._clock, self._monotonic = clock, monotonic_ns
         self._thread, self._busy, self._closed = threading.get_ident(), False, False
         self._clients, self._sequence, self._last_time = {}, 0, None
         self._suspensions = self._restorations = 0
+        self._active_status = None
         self._journal_complete, self._identity_verified = True, False
         self._deadline = self._now() + 2400_000_000_000
         self._identity_deadline = self._last_time + 120_000_000_000
         try:
             self._retain({"kind": "writer_scope", "scope": self._scope, "scope_sha256": approved_scope_sha256}, required=True)
-            factory = boto3.Session if session_factory is None else session_factory
-            self._session = factory(profile_name=PROFILE, region_name=REGION)
-            validate_writer_profile(self._session)
+            if self._scope["session_mode"] == "bound_session":
+                self._session = bound_session
+                claim = bound_session.claim_writer(self._scope["run_id"], self._scope["recipient_sha256"])
+                self._retain(claim, required=True)
+            else:
+                factory = boto3.Session if session_factory is None else session_factory
+                self._session = factory(profile_name=PROFILE, region_name=REGION)
+                validate_writer_profile(self._session)
             sts, guard = self._client("sts", self._identity_deadline)
             guard.active, guard.sent = True, 0
             try:
@@ -197,12 +216,34 @@ class BoundedVersioningWriter:
         config = Config(connect_timeout=3, read_timeout=10, retries={"total_max_attempts": 1, "mode": "standard"},
             ignore_configured_endpoint_urls=True, proxies={}, use_fips_endpoint=False, use_dualstack_endpoint=False,
             s3={"use_accelerate_endpoint": False})
-        client = self._session.client(service, region_name=REGION, config=config,
-            endpoint_url=f"https://{service}.{REGION}.amazonaws.com", use_ssl=True, verify=True)
+        if self._scope["session_mode"] == "bound_session":
+            # The exact broker owns fixed endpoints/configuration and its independent expiry guard.
+            client = self._session.client(service)
+        else:
+            client = self._session.client(service, region_name=REGION, config=config,
+                endpoint_url=f"https://{service}.{REGION}.amazonaws.com", use_ssl=True, verify=True)
         guard = SendBudget(deadline, self._now)
         client.meta.events.register_first(f"before-send.{service}", guard.before_send)
+        if service == "s3" and self._scope["session_mode"] == "bound_session":
+            client.meta.events.register_first("before-send.s3", self._prechange_wire_budget)
         self._clients[service] = (client, guard)
         return client, guard
+
+    def _prechange_wire_budget(self, request, **kwargs):
+        """Recheck the same session's full budget at the actual suspension wire boundary.
+
+        Inputs:
+            self: Bound-session writer owning one currently active fixed status request.
+            request: Prepared SDK request; never inspected or retained by this guard.
+            kwargs: Unused SDK event metadata; never logged.
+        Outputs:
+            None: Rejects insufficient budget before a Suspended send. Enabled recovery remains
+                constrained by the broker expiry guard, not a new full observation-horizon budget.
+        """
+        if self._active_status == "Suspended":
+            self._session.check_writer_budget(self._scope["run_id"])
+            self._prechange_check()
+            self._session.check_writer_budget(self._scope["run_id"])
 
     def _retain(self, record, required=False):
         """Check ordered encrypted acknowledgments and retain uncertainty on any storage failure.
@@ -289,9 +330,16 @@ class BoundedVersioningWriter:
         try:
             self._retain({"kind": "versioning_pending", "request": request,
                 "suspensions": self._suspensions, "restorations": self._restorations}, required=status == "Suspended")
+            if status == "Suspended" and self._scope["session_mode"] == "bound_session":
+                self._retain({"kind": "prechange_session_budget", "assessment":
+                    self._session.check_writer_budget(self._scope["run_id"])}, required=True)
+                self._prechange_check()
+                # Retention/admission can consume time; recheck before activating the wire guard.
+                self._session.check_writer_budget(self._scope["run_id"])
             started, before = self._clock(), self._now()
             if before >= self._deadline:
                 raise ValueError("Writer lifetime elapsed before wire admission")
+            self._active_status = status
             self._guard.active, self._guard.sent = True, 0
             try:
                 # Explicit SDK call supports deterministic IAM analysis; no caller parameters or MFA.
@@ -299,6 +347,7 @@ class BoundedVersioningWriter:
                     VersioningConfiguration={"Status": status})
             finally:
                 self._guard.active = False
+                self._active_status = None
             if not self._retain({"kind": "versioning_response", "request": request, "response": response,
                     "started_at": started, "finished_at": self._clock(), "elapsed_ns": self._now() - before}):
                 raise ValueError("Versioning response retention incomplete")
@@ -315,6 +364,7 @@ class BoundedVersioningWriter:
             raise ValueError("Versioning attempt uncertain; inspect encrypted evidence and verify state") from None
         finally:
             self._guard.active, self._busy = False, False
+            self._active_status = None
 
     def summary(self):
         """Expose minimal transport counters while leaving independent live admission gates closed.
@@ -343,6 +393,8 @@ class BoundedVersioningWriter:
             guard.active = False
             try:
                 client.meta.events.unregister(f"before-send.{service}", guard.before_send)
+                if service == "s3" and self._scope["session_mode"] == "bound_session":
+                    client.meta.events.unregister("before-send.s3", self._prechange_wire_budget)
                 client.close()
             except Exception:
                 pass

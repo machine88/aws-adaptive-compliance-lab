@@ -101,3 +101,10 @@ credential coverage, fresh source receipts and process recovery, integrate the l
 both monitor collectors, then review the exact live rehearsal plan. No role,
 policy, monitoring activation or cloud mutation is authorized by merging this code.
 The separate read-only retirement path cannot close a future mutating cycle.
+
+
+A separate [development case operator](development-versioning-experiment.md) now
+composes actual maintained session/writer/readback adapters behind an explicit
+reviewed live scope. It does not reuse synthetic admission booleans as live
+permission and does not add native/AI collectors or formal trial authority to
+this offline executor. No actual development case has run yet.

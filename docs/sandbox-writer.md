@@ -18,13 +18,15 @@ observer access remains read-only. Saved plans, state and raw verification remai
 
 `research/sandbox_writer.py` exposes `writer_scope`, pure `preview_writer_scope`
 and `BoundedVersioningWriter`. Scope creation defaults to `enable_writes=false`;
-disabled scopes fail before session construction. There is no live CLI or driver
-connection that automatically invokes this library.
+disabled scopes fail before session construction. The [development case operator](development-versioning-experiment.md) now composes
+this library behind preview, explicit scope enablement and separate live approval;
+no automatic code-merge deployment or experiment execution exists.
 
 An explicitly enabled, independently reviewed scope binds the current source,
 run identifier, recipient and authenticated intent review/source/content pins.
 The writer requires a new empty encrypted archive, a five-second crypto limit,
-and the exact proposed `dissertation-sandbox-versioning` role profile in account
+and either the exact `dissertation-sandbox-versioning` role profile or an explicitly
+reviewed `bound_session` scope using the exact initialized broker in account
 653464153304, Ohio. Its existing local-login source profile must have only the
 expected configuration. No password, access key, role credential or token is
 accepted as a function input, printed, persisted or exported by this adapter.
@@ -162,7 +164,11 @@ independent catalog/ground truth, real model training, R power design and formal
 pilot/confirmatory gates remain open.
 
 
-A [disabled bound-session broker](writer-session.md) now supplies a separate
-SDK-stub-tested expiration/identity path. It is not yet connected to this writer,
-whose profile-only validation and false credential-coverage gate remain intact.
-Its generated permission inventory is review-only and changes no writer grant.
+The [bound-session broker](writer-session.md) now connects through explicit
+`session_mode=bound_session` in writer scope v0.2. It checks run/recipient/source
+and permits one writer claim. A maintained pre-change checker is required; the
+full same-session budget and original lock/fresh-state checks are rechecked at
+the actual suspension wire boundary. Enabled recovery does not require a new
+full observation budget. Original profile validation remains intact in default
+profile mode. Neither mode promotes formal/research/restoration gates. No live
+case has run; generated writer permissions are unchanged.

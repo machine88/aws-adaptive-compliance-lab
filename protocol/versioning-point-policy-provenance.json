@@ -1,0 +1,13 @@
+{
+  "version": "versioning-point-policy-provenance-v0.1",
+  "tool": "iam-policy-autopilot",
+  "tool_version": "0.3.0",
+  "source_sha256": {
+    "research/versioning_point.py": "cb4880d7ccc05c21fb013f61ae5b3ed6c98505a86d76f7075cb5f25fd5d179bc"
+  },
+  "analysis_canonical_sha256": "1112119031312eda87c80c1631f1a15ab046a6c613589bc0e8185e29761a6b28",
+  "analysis_retained_privately": true,
+  "review_only": true,
+  "policy_attachment_approved": false,
+  "aws_applied": false
+}
