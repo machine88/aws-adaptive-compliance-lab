@@ -3,6 +3,7 @@ import copy
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import hashlib
+import logging
 from pathlib import Path
 import threading
 import time
@@ -186,6 +187,13 @@ class BoundWriterSession:
         Outputs:
             int: Current monotonic timestamp, or generic ValueError before another request.
         """
+        # SDK debug records can include raw STS responses or signed request tokens.
+        namespaces = ("boto3", "botocore", "urllib3", "awscrt")
+        loggers = [logging.getLogger(name) for name in namespaces]
+        loggers += [logger for name, logger in list(logging.Logger.manager.loggerDict.items())
+                    if isinstance(logger, logging.Logger) and name.startswith(tuple(name + "." for name in namespaces))]
+        if any(logger.isEnabledFor(logging.DEBUG) for logger in loggers):
+            raise ValueError("SDK debug logging must remain disabled")
         value = self._monotonic()
         if threading.get_ident() != self._thread or self._closed or type(value) is not int or value < 0 or value < getattr(self, "_last_ns", 0):
             raise ValueError("Active same-thread monotonic session required")

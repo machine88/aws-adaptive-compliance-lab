@@ -84,6 +84,13 @@ not retained. Failure returns a generic setup error and closes owned clients;
 partial encrypted metadata is preserved. Python/SDK memory cannot be guaranteed
 to be zeroized, and close does not revoke credentials at AWS.
 
+SDK debug logging is rejected before session construction and at broker clock/
+wire checks, including explicitly enabled child loggers. A future controlled
+worker must keep SDK debug logging disabled for the whole session lifetime.
+Arbitrary callers can reconfigure logging or invoke returned SDK clients directly;
+the broker cannot stop debug records emitted before a before-send hook in that
+case. It must not be used in a process that changes that logging policy.
+
 The class is for trusted same-process application code. Python private attributes,
 injected factories and returned clients are not an adversarial security sandbox.
 Future writer integration must enforce its own one-change/three-restoration

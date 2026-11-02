@@ -1,6 +1,7 @@
 """SDK-stub and disposable-CMS tests for exact temporary-session/expiration evidence binding."""
 import json
 import hashlib
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from email.utils import format_datetime
@@ -144,6 +145,15 @@ class WriterSessionTests(unittest.TestCase):
         for scope in (dict(f[0], enable_session=False), dict(f[0], duration_seconds=7200), dict(f[0], region='us-west-2')):
             with self.subTest(scope=scope), self.assertRaises(ValueError):
                 BoundWriterSession(scope, canonical_sha256(scope), f[1], f[2])
+        self.assertEqual(f[5], [])
+        logger = logging.getLogger('botocore.endpoint')
+        previous_level = logger.level
+        try:
+            logger.setLevel(logging.DEBUG)
+            with self.assertRaisesRegex(ValueError, 'SDK debug logging must remain disabled'):
+                self.open(f)
+        finally:
+            logger.setLevel(previous_level)
         self.assertEqual(f[5], [])
         f[1].write = Mock(side_effect=OSError('synthetic-retention-failure'))
         with self.assertRaisesRegex(ValueError, '^Writer session setup failed; no live admission$'):

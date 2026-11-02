@@ -6,7 +6,7 @@
   "account": "653464153304",
   "terraform_context": "infra/writer",
   "source_sha256": {
-    "research/writer_session.py": "8bfdd467c710161d3df857894734372b397de71c32eb59ea4f3e854e4c23ffe8"
+    "research/writer_session.py": "39dbc76ce0c946902c2027202f0db8ad0ab4ff5ff5093ac2f9f39355d303d83f"
   },
   "analysis": {
     "Policies": [
