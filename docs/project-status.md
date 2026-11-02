@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and proposed bounded access root | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and approved, deployed and independently verified bounded writer access | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -45,7 +45,7 @@ synthetic offline validation; no actual restoration candidate or mutating-run cl
 has occurred. A candidate consistency report does not prove restoration or
 permit unlock.
 
-Next is bounded mutation/recovery access, fresh independent receipts and a live
+Next is fresh independent receipts and a live
 adapter for the offline driver, followed by reviewed mutating-run closure/release
 and an approved rehearsal. Source freshness, concurrent-writer exclusion, trigger
 attribution, monitoring/ML readiness and formal-trial authorization remain open.
@@ -68,12 +68,16 @@ CMS retention and injected error/cancellation tests pass. The new disabled SDK t
 actual restoration/rehearsal or research trial has run.
 
 
-The [versioning writer transport and proposed access](sandbox-writer.md) now have
-SDK-stub/CMS validation, generated-policy provenance and a disabled Terraform
-root with its own state key. Actual AWS identity/collision reads confirmed the
-expected non-root user and absent proposed role/policies; both candidate policy
-documents passed validation and 16 custom-policy decisions matched the bounded
-ceiling. These are administrative checks only. No grant, writer profile, scenario
-write or monitoring activation has occurred. Next: complete the private saved
-access-plan review, obtain deployment approval, then validate actual access before
-any separately approved live rehearsal.
+The [versioning writer transport and deployed access](sandbox-writer.md) now have
+SDK-stub/CMS validation, generated-policy provenance and a separately approved
+access deployment completed on November 2, 2026. The exact saved plan created five
+managed resources with no updates or deletes, using the isolated protected state
+and normal locking. Independent AWS reads verified exact trust, role maximum,
+mandatory boundary, both policy documents, one attachment and no inline policies;
+the follow-up plan reported no changes. Source defaults remain disabled, while
+approved active inputs are private and must remain enabled for maintenance. No
+writer profile, bucket transition, new capture, monitoring activation or rehearsal
+was performed. These access checks are administrative evidence only. Next:
+integrate live admission, independent freshness/credential checks and supervised
+recovery/closure before requesting a separately reviewed rehearsal. All eight
+work packages remain open; pilot and confirmatory trials remain zero.
