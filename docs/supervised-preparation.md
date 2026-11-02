@@ -5,7 +5,8 @@ renewed sign-in and verification of the expected account/observer identity. It
 retained fifteen encrypted capture records, two journal records and one recovery
 intent; authenticated intent readback and post-run metadata/ciphertext linkage
 checks passed. No AWS configuration changed, no retry ran and no plaintext was
-exported. The lock remains held. Offline tests additionally use SDK stubs and
+exported. The lock was held at completion and later archived intact under a
+separately approved [read-only retirement](readonly-retirement.md). Offline tests additionally use SDK stubs and
 disposable recipients. The consumed approval authorizes no further run.
 
 This command connects the previously separate components:
@@ -105,7 +106,7 @@ Any existing lock, output or manifest blocks reuse. Post-acquisition failure lea
 the lock and all partial ciphertext/metadata in place. There is no automatic retry,
 lock release, scenario write, recovery planner event, monitoring activation or
 permission deployment. A successful command leaves the sandbox unchanged and
-locked. A [separate read-only retirement command](readonly-retirement.md) is now offline-tested; actual retirement still requires its own reviewed scope and approval. Mutating scenarios need independently verified restoration and their own closure process;
+locked. A [separate read-only retirement command](readonly-retirement.md) has now completed one separately reviewed local archival operation. Each retirement requires its own reviewed scope and approval. Mutating scenarios need independently verified restoration and their own closure process;
 do not delete the lock to run again. Pilot and confirmatory trials remain zero.
 
 Three focused integration tests cover pure preview/approval gates, changed pins,

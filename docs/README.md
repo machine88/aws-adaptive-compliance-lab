@@ -46,3 +46,5 @@ Some historical documents use the original dissertation project name. Existing A
 - [Supervised preparation command](supervised-preparation.md): reviewed read-only observation, persistent lock, encrypted intent readback and process deadline.
 
 - [Reviewed read-only retirement](readonly-retirement.md): preserve a completed preparation lock intact before allowing new cooperative acquisition.
+
+- [Offline change/observe/restore driver](versioning-cycle.md): encrypted action ordering, fixed cutoff and bounded synthetic recovery before a live adapter.

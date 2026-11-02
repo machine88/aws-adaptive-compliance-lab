@@ -1,8 +1,11 @@
 # Reviewed retirement of a completed read-only preparation
 
-Status: implemented and tested offline; **the live preparation lock has not been
-retired**. Its previous approval explicitly retained the lock. This command needs
-its own reviewed scope and approval before use.
+Status: one separately reviewed and approved local retirement completed. The
+original lock directory/inode and owner/intent bytes were preserved intact in a
+private archive; external capture/journal and preparation metadata are unchanged.
+The operational lock and retirement guard are absent. No AWS, Keychain or
+decryption calls ran. That approval is consumed; any further operation needs its
+own reviewed scope and approval. Offline tests additionally use disposable evidence.
 
 This path applies only to a successfully completed `preparation-operator-v0.1`
 read-only development operation. It preserves the entire encrypted intent lock
