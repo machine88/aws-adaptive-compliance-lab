@@ -95,6 +95,7 @@ class BoundWriterSession:
         self._clock, self._monotonic = clock, monotonic_ns
         self._thread, self._closed, self._sequence = threading.get_ident(), False, 0
         self._clients, self._session = {}, None
+        self._ready, self._writer_claimed = False, False
         self._last_ns = self._now()
         self._setup_deadline = self._last_ns + 120_000_000_000
         self._expires_ns = self._expires_at = self._anchor_wall = self._anchor_ns = None
@@ -175,9 +176,61 @@ class BoundWriterSession:
             self.assess_budget()
             source_sts.close()
             del self._clients["source"]
+            self._ready = True
         except BaseException:
             self.close()
             raise ValueError("Writer session setup failed; no live admission") from None
+
+    def evidence_binding(self):
+        """Expose only the metadata pins needed for independent encrypted-record readback.
+
+        Inputs:
+            self: Fully initialized active broker with verified actual bound identity.
+        Outputs:
+            dict: Run, scope and retained nonsecret source-record fingerprints. No keys, tokens,
+                raw provider response, write permission or formal-trial authority are returned.
+        """
+        self._now()
+        if not self._ready:
+            raise ValueError("Initialized bound session required")
+        return {"run_id": self._scope["run_id"], "session_scope_sha256": canonical_sha256(self._scope),
+                "source_record_sha256": self._source_record_sha256}
+
+    def claim_writer(self, run_id, recipient_sha256):
+        """Bind this initialized session to at most one writer with matching run and recipient.
+
+        Inputs:
+            self: Fully initialized broker; no refresh or replacement session is created.
+            run_id: Independently reviewed writer run identifier.
+            recipient_sha256: Independently reviewed writer public-recipient fingerprint.
+        Outputs:
+            dict: Nonsecret session/evidence linkage plus fresh timing assessment. Consumes the
+                one-writer claim before assessment so failed setup cannot silently reset a run.
+                No cloud call, write authorization or independent source-state proof is supplied.
+        """
+        self._now()
+        if not self._ready or self._writer_claimed or run_id != self._scope["run_id"] or recipient_sha256 != self._scope["recipient_sha256"] or self._scope["source_sha256"] != session_source_sha256():
+            raise ValueError("Unused matching bound writer session required")
+        self._writer_claimed = True
+        assessment = self.check_writer_budget(run_id)
+        return {"kind": "bound_writer_session_claim", "run_id": run_id,
+                "session_scope_sha256": canonical_sha256(self._scope),
+                "source_record_sha256": self._source_record_sha256,
+                "budget_assessment": assessment, "live_execution_allowed": False, "research_trials": 0}
+
+    def check_writer_budget(self, run_id):
+        """Recheck full pre-change time coverage for the single claimed writer.
+
+        Inputs:
+            self: Initialized broker already claimed by exactly one writer.
+            run_id: Independent writer run identifier, required to match the original session scope.
+        Outputs:
+            dict: Fresh conservative assessment from the same non-refreshing session; no AWS IO.
+                Intended before suspension only, never as a full-horizon prerequisite for recovery.
+        """
+        if not self._ready or not self._writer_claimed or run_id != self._scope["run_id"]:
+            raise ValueError("Matching claimed writer required")
+        return self.assess_budget()
 
     def _now(self):
         """Reject malformed, backward or cross-thread monotonic use.

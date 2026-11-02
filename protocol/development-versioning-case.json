@@ -1,0 +1,32 @@
+{
+  "version": "development-versioning-case-v0.1",
+  "phase": "development",
+  "purpose": "Validate controlled injection, independent readback, fixed-window timing and protected restoration before pilot research",
+  "resource": "dedicated-empty-s3-sandbox",
+  "initial_versioning": "Enabled",
+  "requested_transition": "Suspended",
+  "required_restoration": "Enabled",
+  "observation_horizon_seconds": 1800,
+  "max_suspension_requests": 1,
+  "max_restoration_requests": 3,
+  "max_point_slots": 6,
+  "max_planned_service_calls": 44,
+  "credential_provider_calls_excluded_from_service_budget": true,
+  "success_requires": [
+    "new locked full protected-empty prestate and authenticated retained intent",
+    "same-session expiration and identity evidence readback before change",
+    "fresh Enabled admission point and matching held lock at suspension wire boundary",
+    "one successful suspension response and independent Suspended trigger point",
+    "one fixed 1800-second cutoff and Suspended window-end point",
+    "independent Enabled readback after bounded restoration",
+    "new full protected-empty poststate capture",
+    "linked encrypted restoration candidate readback and complete action journal"
+  ],
+  "continuous_state_claim_allowed": false,
+  "native_baseline_comparison_performed": false,
+  "ai_model_evaluation_performed": false,
+  "formal_trial_authorized": false,
+  "research_trials": 0,
+  "automatic_lock_release": false,
+  "failure_policy": "Retain every negative or uncertain result and the held recovery lock; no automatic restart or new session to reset mutation/recovery attempts"
+}

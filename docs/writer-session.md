@@ -2,8 +2,10 @@
 
 Status: disabled-by-default broker implemented and tested with SDK stubs and
 real disposable CMS encryption. No actual role session was opened with this
-component. It is not connected to the SDK writer, live admission or a scenario
-runner. No new grants, capture, versioning transition or trial occurred.
+component. It now connects to the writer through explicit bound-session mode and the
+[development case operator](development-versioning-experiment.md). That path has
+only SDK-stub/CMS validation. No new grants, live capture, versioning transition
+or trial occurred.
 
 ## Why the same session matters
 
@@ -59,6 +61,9 @@ Public methods:
 
 | Method | Inputs | Output/side effect |
 | --- | --- | --- |
+| `evidence_binding()` | None | Nonsecret scope/source-record pins for independently decrypted metadata linkage |
+| `claim_writer(run_id, recipient_sha256)` | Independent run and recipient pins | One writer claim, consumed before a fresh assessment; prevents silent instance reset |
+| `check_writer_budget(run_id)` | Matching claimed run | Fresh full pre-change budget without provider refresh; recovery uses expiry limits |
 | `assess_budget()` | None | Fresh conservative timing assessment from the retained expiration and continuously compared local wall/monotonic anchors; no provider refresh |
 | `client(service)` | Exactly `sts` or `s3` | Cached fixed-region client from the bound static SDK session, with expiration/clock wire guard; invokes no service operation itself |
 | `close()` | None | Disable broker and close owned clients; no automatic refresh, rollback, revocation, unlock or evidence deletion |
@@ -94,8 +99,9 @@ case. It must not be used in a process that changes that logging policy.
 The class is for trusted same-process application code. Python private attributes,
 injected factories and returned clients are not an adversarial security sandbox.
 Future writer integration must enforce its own one-change/three-restoration
-budget. This broker currently fails the writer's profile-only validator and is
-not passed into that writer; no fake profile metadata is used to bypass it. The
+budget. The writer now accepts the exact broker class only in explicitly scoped
+`bound_session` mode and rejects mixed factories/profile mode. No fake profile
+metadata is used. Each broker can be claimed by one matching writer only. The
 standalone budget result deliberately keeps provider/credential/live proof gates
 false until an integrated, independently reviewed admission contract exists.
 
@@ -116,14 +122,13 @@ uvx iam-policy-autopilot@latest generate-policies \
 ```
 
 The retained run used cached pinned 0.3.0, disabled telemetry and no upload flag.
-`protocol/writer-session-policy-inventory.json` preserves the unedited analysis,
-its canonical hash and exact source fingerprint. It is **review inventory only**,
-not a grant or deployable policy. The analyzer includes broad AssumeRole resource
-patterns and SetContext, SetSourceIdentity and TagSession alongside identity;
-this broker does not request those optional fields. Do not attach that output to
-the writer or source user. Existing writer grants remain unchanged, and its
-boundary continues to deny role chaining. No new policy was attached, deployed
-or simulated as part of this offline component.
+`protocol/writer-session-policy-provenance.json` publishes only tool/version,
+exact source fingerprint, analysis fingerprint and closed approval flags. The
+full unedited account-specific analysis remains private. It is **review inventory only**,
+not a grant or deployable policy. The generated analysis is broader than the broker's fixed requests and is kept
+private for review. It must not be attached to the writer or source user. Existing
+writer grants remain unchanged. No policy was attached, deployed or simulated
+as part of this offline component.
 
 ## Validation and next integration
 
@@ -134,10 +139,11 @@ short expiration despite a one-hour request; service/local and wall/monotonic
 clock disagreement; setup delays, wrong thread, closure and conservative expiry.
 They use synthetic SDK credentials and disposable recipients only.
 
-Next: integrate this broker with the writer without weakening the existing
-profile-only path, bind retained session evidence to a held intent/lock and fresh
-observer receipts, and enforce pre-change budget and process/recovery deadlines.
-Then review independent restoration, mutating-run closure and the exact live
-rehearsal scope. A new real authentication pass or capture needs its own approval;
+The [development case](development-versioning-experiment.md) now composes the
+existing profile path, explicit bound-session path, held lock/intent, fresh
+independent receipts, timed observation and protected post-state/candidate
+readback. Next: complete validation, review the concrete private scope and obtain
+explicit approval before that first live pass. The recovery lock remains held
+for review; there is no automatic mutating-run release. A new real authentication pass or capture needs its own approval;
 merging this code does not authorize one. Pilot/confirmatory evidence remains
 separate and no study model has been trained.

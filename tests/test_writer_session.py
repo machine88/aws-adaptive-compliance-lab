@@ -46,7 +46,7 @@ class WriterSessionTests(unittest.TestCase):
         """
         cls.keys.cleanup()
 
-    def fixture(self, wrong_source=False, wrong_role=False, wrong_bound=False, short=False, bad_date=False, denied=False):
+    def fixture(self, wrong_source=False, wrong_role=False, wrong_bound=False, short=False, bad_date=False, denied=False, wall=None):
         """Prepare exact SDK request expectations and a same-session static client factory.
 
         Inputs:
@@ -57,6 +57,7 @@ class WriterSessionTests(unittest.TestCase):
             short: Return insufficient actual expiration despite a requested one-hour session.
             bad_date: Return a service Date far from the local receipt clock.
             denied: Simulate a private provider failure containing a sentinel that must not escape.
+            wall: Optional synthetic aware service clock; None uses the fixed fixture date.
         Outputs:
             tuple: Enabled scope, archive, factory, mutable fake clock, stubbers and factory call list.
                 All clients use synthetic static credentials; no live provider lookup occurs.
@@ -65,7 +66,7 @@ class WriterSessionTests(unittest.TestCase):
         self.addCleanup(folder.cleanup)
         archive = EncryptedArchive(Path(folder.name).resolve() / 'archive', self.cert, self.binary, 5)
         scope = writer_session_scope('a' * 32, self.pin, enable_session=True)
-        clock = {'ns': 5_000_000_000, 'wall': datetime(2026, 11, 2, tzinfo=timezone.utc)}
+        clock = {'ns': 5_000_000_000, 'wall': wall or datetime(2026, 11, 2, tzinfo=timezone.utc)}
         credentials = {'AccessKeyId': 'ASIA' + 'A' * 16, 'SecretAccessKey': 'synthetic-secret-sentinel',
                        'SessionToken': 'synthetic-token-sentinel',
                        'Expiration': clock['wall'] + timedelta(seconds=2400 if short else 3600)}
@@ -118,7 +119,7 @@ class WriterSessionTests(unittest.TestCase):
                 'region_name': 'us-east-2'})
             return bound_sdk
 
-        return scope, archive, factory, clock, (source_stub, bound_stub), calls
+        return scope, archive, factory, clock, (source_stub, bound_stub), calls, (bound_sdk, bound_client)
 
     def open(self, fixture):
         """Connect an explicitly synthetic fixture to the broker without network access.
@@ -129,7 +130,7 @@ class WriterSessionTests(unittest.TestCase):
         Outputs:
             BoundWriterSession: Initialized test broker with no live writer admission.
         """
-        scope, archive, factory, clock, _, _ = fixture
+        scope, archive, factory, clock, *_ = fixture
         return BoundWriterSession(scope, canonical_sha256(scope), archive, factory,
                                   clock=lambda: clock['wall'].isoformat(), monotonic_ns=lambda: clock['ns'])
 
@@ -169,10 +170,11 @@ class WriterSessionTests(unittest.TestCase):
             None: Assertions verify exact API calls, metadata privacy and unchanged live gates.
         """
         root = Path(__file__).resolve().parents[1]
-        inventory = json.loads((root / 'protocol/writer-session-policy-inventory.json').read_text())
+        inventory = json.loads((root / 'protocol/writer-session-policy-provenance.json').read_text())
         self.assertEqual(inventory['source_sha256'], {'research/writer_session.py': hashlib.sha256((root / 'research/writer_session.py').read_bytes()).hexdigest()})
-        self.assertEqual(canonical_sha256(inventory['analysis']), inventory['analysis_canonical_sha256'])
-        self.assertTrue(inventory['review_inventory_only'])
+        self.assertRegex(inventory['analysis_canonical_sha256'], r'^[0-9a-f]{64}$')
+        self.assertTrue(inventory['analysis_retained_privately'] and inventory['review_only'])
+        self.assertNotIn('analysis', inventory)
         self.assertFalse(inventory['policy_attachment_approved'] or inventory['aws_applied'])
         f = self.fixture()
         broker = self.open(f)
@@ -255,3 +257,98 @@ class WriterSessionTests(unittest.TestCase):
         late[1].write = delayed
         with self.assertRaises(ValueError):self.open(late)
         self.assertEqual(len(late[5]), 0)
+
+    def test_bound_writer_change_recovery_and_insufficient_prechange_budget(self):
+        """Use one exact broker in the real writer and keep late Enabled recovery available.
+
+        Inputs:
+            self: Test instance creating disposable CMS archives and exact SDK-stub responses.
+        Outputs:
+            None: Verifies session/run/recipient and one-use binding, fixed writes, pre-change
+                budget failures and unchanged live/restoration gates; no actual AWS request.
+        """
+        from research.recovery_intent import build_recovery_intent
+        from research.sandbox_writer import BoundedVersioningWriter, writer_scope
+        from tests.test_sandbox_emptiness import fixture as listings
+        from tests.test_sandbox_readiness import fixture as metadata
+        for late in (False, True):
+            with self.subTest(late=late):
+                f = self.fixture()
+                role_session, role_sts = f[6]
+                f[4][1].add_response('get_caller_identity', {'Account': '653464153304', 'Arn': ROLE_ARN,
+                    'UserId': 'synthetic-role-id:' + ROLE,
+                    'ResponseMetadata': {'HTTPStatusCode': 200, 'RequestId': 'writer-identity'}}, {})
+                s3 = boto3.Session.client(role_session, 's3', region_name='us-east-2', endpoint_url='https://s3.us-east-2.amazonaws.com')
+                s3_stub = Stubber(s3)
+                for status in (['Enabled'] if late else ['Suspended', 'Enabled']):
+                    s3_stub.add_response('put_bucket_versioning',
+                        {'ResponseMetadata': {'HTTPStatusCode': 200, 'RequestId': 'writer-versioning'}},
+                        {'Bucket': 'dissertation-sandbox-653464153304-us-east-2-s3-01',
+                         'ExpectedBucketOwner': '653464153304', 'VersioningConfiguration': {'Status': status}})
+                s3_stub.activate()
+                self.addCleanup(s3_stub.deactivate)
+
+                def client(service, **options):
+                    """Return real stubbed clients from the fixture's one explicit SDK session.
+
+                    Inputs:
+                        service: Fixed sts or s3 name requested by the maintained session broker.
+                        options: Fixed endpoint/TLS/Config arguments; checked in the broker tests.
+                    Outputs:
+                        object: Same-session stubbed client; no network or credential lookup.
+                    """
+                    self.assertIn(service, ('sts', 's3'))
+                    return role_sts if service == 'sts' else s3
+
+                role_session.client.side_effect = client
+                broker = self.open(f)
+                self.addCleanup(broker.close)
+                with self.assertRaises(ValueError):broker.claim_writer('d' * 32, self.pin)
+                with self.assertRaises(ValueError):broker.claim_writer('a' * 32, 'd' * 64)
+                intent = build_recovery_intent('a' * 32, metadata(), listings(), 'b' * 64, 'c' * 64, self.pin)
+                scope = writer_scope('a' * 32, self.pin, canonical_sha256(intent), 'b' * 64, 'c' * 64,
+                                     enable_writes=True, session_mode='bound_session')
+                folder = tempfile.TemporaryDirectory()
+                self.addCleanup(folder.cleanup)
+                archive = EncryptedArchive(Path(folder.name).resolve() / 'writer', self.cert, self.binary, 5)
+                with self.assertRaises(ValueError):
+                    BoundedVersioningWriter(scope, canonical_sha256(scope), intent, archive)
+                admission = {'valid': True, 'checks': 0}
+
+                def prechange():
+                    """Simulate a maintained lock/fresh-receipt admission check without a cloud call.
+
+                    Inputs:
+                        No arguments; reads only this test's synthetic admission state.
+                    Outputs:
+                        None: Counts checks and raises for invalid synthetic admission.
+                    """
+                    admission['checks'] += 1
+                    if not admission['valid']:
+                        raise ValueError('Synthetic admission blocked')
+
+                writer = BoundedVersioningWriter(scope, canonical_sha256(scope), intent, archive,
+                    clock=lambda: f[3]['wall'].isoformat(), monotonic_ns=lambda: f[3]['ns'], bound_session=broker, prechange_check=prechange)
+                self.addCleanup(writer.close)
+                with self.assertRaises(ValueError):broker.claim_writer('a' * 32, self.pin)
+                admission['valid'] = False
+                writer._active_status = 'Suspended'
+                with self.assertRaises(ValueError):writer._prechange_wire_budget(None)
+                writer._active_status = None
+                admission['valid'] = True
+                if late:
+                    f[3]['ns'] += 1100_000_000_000
+                    f[3]['wall'] += timedelta(seconds=1100)
+                    writer._active_status = 'Suspended'
+                    with self.assertRaises(ValueError):writer._prechange_wire_budget(None)
+                    writer._active_status = None
+                    with self.assertRaises(ValueError):writer.suspend_once()
+                else:
+                    writer.suspend_once()
+                    with self.assertRaises(ValueError):writer.suspend_once()
+                writer.restore_enabled()
+                s3_stub.assert_no_pending_responses()
+                for stub in f[4]:stub.assert_no_pending_responses()
+                self.assertEqual(writer.summary()['suspensions'], 1)
+                self.assertEqual(writer.summary()['restorations'], 1)
+                self.assertFalse(writer.summary()['live_execution_allowed'] or writer.summary()['restoration_verified'])

@@ -77,10 +77,10 @@ They use synthetic metadata without AWS credentials or real waiting.
 
 The [disabled session broker](writer-session.md) now binds a fixed role response
 to one in-memory SDK session, encrypted metadata and continuously checked clocks
-in SDK-stub tests. No actual session has been opened through it. Next: integrate
-that session and its evidence with the writer and live admission without treating
-this planning result as a permit.
-Then integrate fresh observer receipts, held intent/lock, supervision and
-independent restoration/closure. Access deployment approval does not authorize a
+in SDK-stub tests. No actual session has been opened through it. The
+[development case](development-versioning-experiment.md) now composes that session
+with the writer, fresh observer receipts, held intent/lock, supervision and
+protected post-state/candidate readback. Its live pass is pending review and
+approval; a planning result remains insufficient as a permit. Access deployment approval does not authorize a
 new capture, versioning write or rehearsal. The [writer transport](sandbox-writer.md)
 and [synthetic-only executor](versioning-cycle.md) retain their existing boundaries.
