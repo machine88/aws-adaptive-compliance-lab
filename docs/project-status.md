@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; preview-first supervised preparation command with retained-intent readback | Approved live preparation and independent source/clock checks; live recovery-intent/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -29,20 +29,25 @@ The [sandbox observer](sandbox-observer.md) now has its own approved and deploye
 
 One separately approved [development observer capture](sandbox-verification.md) has now completed, with fifteen encrypted capture records and two operator journal records. Bounded local verification through the trusted recipient/helper passed the approved scope, receipt-chain and administrative pre-state checks. Retained responses showed expected protections and complete empty current-object, version/deletion-marker and unfinished-upload listings at their individual receipt times. No plaintext evidence was exported, and the capture was not repeated.
 
-This advances the engineering access/acquisition boundary. Freshness, simultaneous-state/concurrency proof, trigger attribution, ML readiness and formal-trial authorization remain open. The new [callback-based locked preparation](observer-recovery-preparation.md) now joins a new scoped observation, anchored local lock, local timing checks and encrypted intent in offline tests. An approved run of the new supervised preparation command, independent source/clock validation and controlled restoration/release remain necessary before rehearsal. All eight work packages remain open; pilot/confirmatory trials and study-model training have not started.
+The separately approved [supervised preparation](supervised-preparation.md) has
+now also completed once. Fresh sign-in and an actual STS check confirmed the
+expected account and dedicated observer role before execution. The new pass held
+the local lock, verified fifteen encrypted capture records and two journal
+records, retained one encrypted recovery intent, and verified that intent through
+the trusted helper. Post-run metadata/ciphertext hashes, record counts and lock
+identity matched; no plaintext was exported, no AWS configuration changed and no
+retry ran. The lock and all private artifacts remain retained.
 
+The [restoration-candidate reader](recovery-review.md) now verifies a separately
+pinned encrypted candidate against its original intent, including before/after
+intent checks, byte limits and anchored directories. That component has only
+synthetic offline validation; no actual restoration candidate, closure or release
+has occurred. A candidate consistency report does not prove restoration or
+permit unlock.
 
-The next live-preparation prerequisite now supports guarded nested process groups:
-a future outer supervisor can keep the observer within its own timeout boundary.
-Real local process tests verify outer-timeout termination of a nested descendant
-and reject use from an ordinary application process. This is offline engineering
-work, not a completed live adapter or approval for another AWS capture.
-
-
-The [supervised preparation command](supervised-preparation.md) now composes the
-observer, lock, archive verification, encrypted intent and retained-intent readback
-under an outer process deadline. It defaults to preview, requires a new exact
-reviewed scope, keeps partial work and the lock on failure, and has no mutation or
-release path. Offline integration uses real encryption and SDK stubs; no live
-integrated preparation has run. Next: review its concrete live scope, then implement
-and review closure/release before any change/observe/restore rehearsal.
+Next is independent restoration evidence and a reviewed evidence-preserving
+closure/release path, followed by the integrated change/observe/restore driver
+and an approved rehearsal. Source freshness, concurrent-writer exclusion, trigger
+attribution, monitoring/ML readiness and formal-trial authorization remain open.
+All eight work packages remain open; pilot/confirmatory trials and study-model
+training have not started.
