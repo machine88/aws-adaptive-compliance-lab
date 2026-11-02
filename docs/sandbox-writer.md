@@ -1,9 +1,18 @@
-# Bounded sandbox versioning transport and proposed access
+# Bounded sandbox versioning transport and deployed access
 
-Status: SDK transport and disabled access root implemented; validated offline.
-The proposed role/policies were absent at the read-only account check. No writer
-role has been deployed, profile installed, versioning write executed, or live
-rehearsal run in this step. Existing observer access remains read-only.
+Status: the separately approved saved access plan was applied and independently
+verified on November 2, 2026. It created the dedicated role, generated policy,
+mandatory boundary, attachment and Terraform guard: five creates, zero updates
+and zero deletes. Actual IAM reads matched the reviewed trust, 3,600-second role
+maximum, boundary and policy documents, one managed attachment and zero inline
+policies. The isolated state contains five managed instances; a follow-up plan
+reported no changes and the backend lock was absent afterward.
+
+The source root still defaults off; approved active inputs are retained privately
+and must remain enabled for future maintenance plans. Setting the source default
+to false is not a pause operation for deployed resources. No writer profile was
+installed, versioning change executed, new capture made or rehearsal run. Existing
+observer access remains read-only. Saved plans, state and raw verification remain private.
 
 ## Transport contract
 
@@ -58,13 +67,13 @@ attempts may continue despite journal outage, but remain uncertain if response
 retention fails. This prioritizes best-effort recovery without fabricating a
 complete audit. There is no mutation retry, automatic restart or profile fallback.
 
-## Proposed IAM access
+## Deployed IAM access
 
 `infra/writer` creates no IAM resources by default. Enabling it additionally needs
 a valid independent review-manifest reference, exact non-root provisioning user
 and default workspace. A matching hash is provenance, not user approval.
 
-The proposed resources are one dedicated role, one generated managed policy,
+The deployed resources are one dedicated role, one generated managed policy,
 one mandatory boundary and one policy attachment, plus a Terraform identity guard.
 Trust names only the existing IAM user. The role maximum session is 3,600 seconds;
 no local profile or credential is created by Terraform. Destruction is guarded.
@@ -127,8 +136,10 @@ zero default grants, boundary/trust, missing review, root and wrong account.
 Existing provenance coverage now also checks the writer source/generated output.
 CI validates seven roots with no AWS credentials or deployment authority.
 
-A real private saved Terraform plan, backend/collision checks and explicit user
-approval are required before IAM creation. Approval of role deployment does not
+The real private saved Terraform plan, backend/collision checks and explicit user
+approval preceded IAM creation. The exact saved plan was applied with normal
+backend locking after renewed non-root identity and artifact checks. Actual IAM
+verification and a no-change follow-up plan passed. Approval of role deployment does not
 authorize any versioning change, capture or rehearsal. No compute, new bucket,
 monitoring activation, KMS key or paid ML service is requested by this access root;
 existing state/log request/storage usage remains a cost dimension. The $100

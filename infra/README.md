@@ -46,4 +46,4 @@ Creation and activation defaults are off in source; those defaults are not pause
 
 Start with the [deployment review](../docs/phase2-deployment-review.md), [sandbox review](../docs/scenario-sandbox-review.md), [bounded access review](../docs/sandbox-access-review.md) and [roadmap](../docs/implementation-plan.md). Cloud changes, captures and scenario runs have separate approval gates.
 
-The proposed [versioning writer](../docs/sandbox-writer.md) is not deployed. Its generated policy requires the mandatory exact-target boundary, separate protected state and an explicitly approved saved access plan. Role deployment never authorizes a scenario change.
+The [versioning writer access](../docs/sandbox-writer.md) was deployed from its explicitly approved saved plan and independently verified on November 2, 2026. Its generated policy has the mandatory exact-target boundary, separate protected state, one attachment and no inline policies; the follow-up plan found no changes. Source defaults remain disabled; retain the private approved enabled inputs for maintenance because disabling an existing root is not a pause. Role deployment never authorizes a scenario change.
