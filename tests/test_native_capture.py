@@ -416,23 +416,28 @@ class NativeTests(unittest.TestCase):
         self.assertEqual(env["AWS_EC2_METADATA_DISABLED"], "true")
 
     def test_real_process_group_timeout_discards_outputs(self):
-        """Kill a synthetic sleeping process group; no SDK or worker capture is executed.
+        """Stop sleeping descendants on timeout and on explicitly supervised normal parent exit.
 
         Inputs:
-            A local Python child that spawns a sleeping grandchild and writes its PID in test storage.
+            self: Test instance using disposable processes and private PID markers only.
         Outputs:
-            None: Asserts timeout and that the grandchild is absent or nonrunning zombie afterward.
+            None: Asserts descendants are absent or nonrunning zombies after both exit paths.
         """
-        pid_file = self.parent / "test-child.pid"
-        code = ("import subprocess,sys,time; from pathlib import Path; "
-                "p=subprocess.Popen([sys.executable,'-c','import time; time.sleep(20)']); "
-                "Path(sys.argv[1]).write_text(str(p.pid)); print('synthetic-hidden-output'); time.sleep(20)")
-        result = bounded_worker([sys.executable, "-I", "-c", code, str(pid_file)], {}, 1)
-        self.assertEqual(result, "timeout")
-        self.assertTrue(pid_file.exists())
-        pid = int(pid_file.read_text())
-        state = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)], capture_output=True, text=True).stdout.strip()
-        self.assertTrue(not state or state.startswith("Z"))
+        for normal_exit in (False, True):
+            with self.subTest(normal_exit=normal_exit):
+                pid_file = self.parent / ("normal-child.pid" if normal_exit else "timeout-child.pid")
+                code = ("import subprocess,sys,time; from pathlib import Path; "
+                        "p=subprocess.Popen([sys.executable,'-c','import time; time.sleep(20)']); "
+                        "Path(sys.argv[1]).write_text(str(p.pid)); print('synthetic-hidden-output'); "
+                        + ("time.sleep(0.1)" if normal_exit else "time.sleep(20)"))
+                result = bounded_worker([sys.executable, "-I", "-c", code, str(pid_file)], {}, 1,
+                                        terminate_group_on_exit=normal_exit)
+                self.assertEqual(result, "success" if normal_exit else "timeout")
+                self.assertTrue(pid_file.exists())
+                pid = int(pid_file.read_text())
+                state = subprocess.run(["ps", "-o", "stat=", "-p", str(pid)],
+                                       capture_output=True, text=True).stdout.strip()
+                self.assertTrue(not state or state.startswith("Z"))
 
 
     def test_nested_supervisor_timeout_kills_observer_descendant(self):

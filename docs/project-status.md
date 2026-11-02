@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration | Reviewed live preparation adapter and independent source/clock checks; live recovery-intent/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; preview-first supervised preparation command with retained-intent readback | Approved live preparation and independent source/clock checks; live recovery-intent/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -29,7 +29,7 @@ The [sandbox observer](sandbox-observer.md) now has its own approved and deploye
 
 One separately approved [development observer capture](sandbox-verification.md) has now completed, with fifteen encrypted capture records and two operator journal records. Bounded local verification through the trusted recipient/helper passed the approved scope, receipt-chain and administrative pre-state checks. Retained responses showed expected protections and complete empty current-object, version/deletion-marker and unfinished-upload listings at their individual receipt times. No plaintext evidence was exported, and the capture was not repeated.
 
-This advances the engineering access/acquisition boundary. Freshness, simultaneous-state/concurrency proof, trigger attribution, ML readiness and formal-trial authorization remain open. The new [callback-based locked preparation](observer-recovery-preparation.md) now joins a new scoped observation, anchored local lock, local timing checks and encrypted intent in offline tests. A reviewed live adapter, independent source/clock validation and controlled restoration/release remain necessary before rehearsal. All eight work packages remain open; pilot/confirmatory trials and study-model training have not started.
+This advances the engineering access/acquisition boundary. Freshness, simultaneous-state/concurrency proof, trigger attribution, ML readiness and formal-trial authorization remain open. The new [callback-based locked preparation](observer-recovery-preparation.md) now joins a new scoped observation, anchored local lock, local timing checks and encrypted intent in offline tests. An approved run of the new supervised preparation command, independent source/clock validation and controlled restoration/release remain necessary before rehearsal. All eight work packages remain open; pilot/confirmatory trials and study-model training have not started.
 
 
 The next live-preparation prerequisite now supports guarded nested process groups:
@@ -37,3 +37,12 @@ a future outer supervisor can keep the observer within its own timeout boundary.
 Real local process tests verify outer-timeout termination of a nested descendant
 and reject use from an ordinary application process. This is offline engineering
 work, not a completed live adapter or approval for another AWS capture.
+
+
+The [supervised preparation command](supervised-preparation.md) now composes the
+observer, lock, archive verification, encrypted intent and retained-intent readback
+under an outer process deadline. It defaults to preview, requires a new exact
+reviewed scope, keeps partial work and the lock on failure, and has no mutation or
+release path. Offline integration uses real encryption and SDK stubs; no live
+integrated preparation has run. Next: review its concrete live scope, then implement
+and review closure/release before any change/observe/restore rehearsal.
