@@ -160,3 +160,9 @@ currently deployed baseline control candidates. No control is added, case droppe
 or compliance label inferred from this development transport. Monitoring validity,
 independent catalog/ground truth, real model training, R power design and formal
 pilot/confirmatory gates remain open.
+
+
+A [disabled bound-session broker](writer-session.md) now supplies a separate
+SDK-stub-tested expiration/identity path. It is not yet connected to this writer,
+whose profile-only validation and false credential-coverage gate remain intact.
+Its generated permission inventory is review-only and changes no writer grant.
