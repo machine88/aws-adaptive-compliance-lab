@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; separately reviewed read-only retirement command (offline-tested only) | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -51,3 +51,11 @@ and an approved rehearsal. Source freshness, concurrent-writer exclusion, trigge
 attribution, monitoring/ML readiness and formal-trial authorization remain open.
 All eight work packages remain open; pilot/confirmatory trials and study-model
 training have not started.
+
+
+The [read-only retirement command](readonly-retirement.md) now preserves a completed
+read-only preparation lock intact in a private same-device archive, using a
+persistent guard to block cooperating acquisition during archival. It is tested
+offline only. The actual operational lock remains held; its retirement needs a
+separate concrete reviewed scope and explicit approval. This path cannot close a
+run that attempted a scenario write or substitute for verified restoration.
