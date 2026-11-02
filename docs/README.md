@@ -44,3 +44,5 @@ These documents describe components and review requirements. They do not grant l
 Some historical documents use the original dissertation project name. Existing AWS identifiers and private retained evidence keep their original names for traceability. Raw approvals, state, account responses, captures and the source proposal remain private.
 
 - [Supervised preparation command](supervised-preparation.md): reviewed read-only observation, persistent lock, encrypted intent readback and process deadline.
+
+- [Reviewed read-only retirement](readonly-retirement.md): preserve a completed preparation lock intact before allowing new cooperative acquisition.

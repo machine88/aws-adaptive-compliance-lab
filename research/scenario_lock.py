@@ -7,6 +7,8 @@ import stat
 
 from research.sandbox_readiness import BUCKET
 
+RETIREMENT_GUARD = BUCKET + ".retirement"
+
 
 def private_lock_root(root):
     """Validate the canonical existing private directory used by cooperating local runners.
@@ -47,13 +49,16 @@ def acquire_sandbox_lock(root, run_id):
     Outputs:
         Path: Created fixed lock directory containing a private owner.json marker. Existing
             locks raise FileExistsError regardless of age/PID. Any partial creation failure
-            leaves the lock in place for manual recovery. No AWS or credential access occurs.
+            leaves the lock in place for manual recovery. A pending retirement guard is checked
+            before/after reservation and synchronization; no AWS or credential access occurs.
     """
     validate_run_id(run_id)
     parent = private_lock_root(root)
     lock = parent / (BUCKET + ".lock")
+    require_no_retirement(parent)
     # mkdir is the exclusion boundary; never delete another run's lock or infer staleness.
     lock.mkdir(mode=0o700)
+    require_no_retirement(parent)
     payload = json.dumps({"version": "sandbox-local-lock-v0.1", "bucket": BUCKET,
                           "run_id": run_id}, sort_keys=True).encode("utf-8")
     descriptor = os.open(lock / "owner.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
@@ -68,7 +73,21 @@ def acquire_sandbox_lock(root, run_id):
             os.fsync(descriptor)
         finally:
             os.close(descriptor)
+    require_no_retirement(parent)
     return lock
+
+
+def require_no_retirement(root):
+    """Block acquisition while a reviewed retirement is pending or interrupted.
+
+    Inputs:
+        root: Already validated private cooperative lock root.
+    Outputs:
+        None: Checks the fixed guard name without deleting it; any entry or broken link blocks.
+    """
+    guard = Path(root) / RETIREMENT_GUARD
+    if guard.exists() or guard.is_symlink():
+        raise ValueError("Pending retirement requires review before sandbox acquisition")
 
 
 def inspect_sandbox_lock(root, run_id):

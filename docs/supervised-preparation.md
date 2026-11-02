@@ -105,7 +105,7 @@ Any existing lock, output or manifest blocks reuse. Post-acquisition failure lea
 the lock and all partial ciphertext/metadata in place. There is no automatic retry,
 lock release, scenario write, recovery planner event, monitoring activation or
 permission deployment. A successful command leaves the sandbox unchanged and
-locked. Closure and release require a separately implemented, reviewed process;
+locked. A [separate read-only retirement command](readonly-retirement.md) is now offline-tested; actual retirement still requires its own reviewed scope and approval. Mutating scenarios need independently verified restoration and their own closure process;
 do not delete the lock to run again. Pilot and confirmatory trials remain zero.
 
 Three focused integration tests cover pure preview/approval gates, changed pins,
