@@ -1,6 +1,6 @@
 # Locked observer-to-recovery preparation
 
-Status: callback-based integration implemented and tested offline; one separately approved supervised live preparation has now completed with verified encrypted intent readback. No AWS mutation ran, and its local lock remains held. The earlier standalone observer pass remains separate historical development evidence. The separate [supervised preparation command](supervised-preparation.md) now supplies a reviewed live adapter; this callback module itself has no mutation command.
+Status: callback-based integration implemented and tested offline; one separately approved supervised live preparation has now completed with verified encrypted intent readback. No AWS mutation ran; its lock was held at completion and later archived intact under separate read-only retirement approval. The earlier standalone observer pass remains separate historical development evidence. The separate [supervised preparation command](supervised-preparation.md) now supplies a reviewed live adapter; this callback module itself has no mutation command.
 
 `research/observer_recovery_preparation.py` connects the existing local exclusion lock, observer operator, bounded archive reader and encrypted recovery-intent writer. This is preparation for a future reviewed development rehearsal; it grants no research or scenario-execution authority.
 

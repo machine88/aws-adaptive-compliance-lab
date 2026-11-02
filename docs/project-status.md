@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; separately reviewed read-only retirement command (offline-tested only) | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -36,26 +36,33 @@ the local lock, verified fifteen encrypted capture records and two journal
 records, retained one encrypted recovery intent, and verified that intent through
 the trusted helper. Post-run metadata/ciphertext hashes, record counts and lock
 identity matched; no plaintext was exported, no AWS configuration changed and no
-retry ran. The lock and all private artifacts remain retained.
+retry ran. The lock was retained at preparation completion and later archived intact under separate approval; all private artifacts remain preserved.
 
 The [restoration-candidate reader](recovery-review.md) now verifies a separately
 pinned encrypted candidate against its original intent, including before/after
 intent checks, byte limits and anchored directories. That component has only
-synthetic offline validation; no actual restoration candidate, closure or release
+synthetic offline validation; no actual restoration candidate or mutating-run closure/release
 has occurred. A candidate consistency report does not prove restoration or
 permit unlock.
 
-Next is independent restoration evidence and a reviewed evidence-preserving
-closure/release path, followed by the integrated change/observe/restore driver
+Next is bounded mutation/recovery access, fresh independent receipts and a live
+adapter for the offline driver, followed by reviewed mutating-run closure/release
 and an approved rehearsal. Source freshness, concurrent-writer exclusion, trigger
 attribution, monitoring/ML readiness and formal-trial authorization remain open.
 All eight work packages remain open; pilot/confirmatory trials and study-model
 training have not started.
 
 
-The [read-only retirement command](readonly-retirement.md) now preserves a completed
-read-only preparation lock intact in a private same-device archive, using a
-persistent guard to block cooperating acquisition during archival. It is tested
-offline only. The actual operational lock remains held; its retirement needs a
-separate concrete reviewed scope and explicit approval. This path cannot close a
-run that attempted a scenario write or substitute for verified restoration.
+The [read-only retirement command](readonly-retirement.md) has now completed one
+separately approved local operation. The original lock directory/inode and every
+owner/intent byte were preserved in a private archive. Capture/journal hashes and
+preparation metadata matched before/after; the operational lock and retirement
+guard are absent. No AWS, Keychain or decryption calls occurred. That approval is
+consumed and authorizes no additional capture or mutation. This path cannot close
+a run that attempted a scenario write or substitute for verified restoration.
+
+The [offline change/observe/restore driver](versioning-cycle.md) now executes the
+recovery table against trusted synthetic callbacks, with durable pre-change
+journaling, one fixed observation cutoff and bounded restoration. Real disposable
+CMS retention and injected error/cancellation tests pass. There is no live SDK
+write adapter, no actual restoration/rehearsal and no research trial.
