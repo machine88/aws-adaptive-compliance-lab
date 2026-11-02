@@ -217,3 +217,119 @@ def retain_restoration_candidate(lock_root, run_id, decrypt_record, metadata, li
         os.fsync(handle.fileno())
     sync_archive_directory(archive.root)
     return commitment
+
+
+def read_restoration_candidate(lock_root, run_id, decrypt_record, review_manifest_sha256,
+                                source_sha256, recipient_sha256, intent_commitment_sha256,
+                                candidate_commitment_sha256, max_bytes=MAX_BYTES):
+    """Verify a retained encrypted candidate and its intent without treating either as release authority.
+
+    Inputs:
+        lock_root: Canonical private root containing the held intent/closure lock.
+        run_id: Independently retained expected run identifier.
+        decrypt_record: Trusted authenticated bounded ciphertext-to-bytes callback; never logged.
+        review_manifest_sha256: Independent original preparation-manifest pin.
+        source_sha256: Independent source pin of the retained intent, not today's producer code.
+        recipient_sha256: Independent normalized public recipient pin.
+        intent_commitment_sha256: Independent original intent commitment pin.
+        candidate_commitment_sha256: Independently retained candidate commitment pin.
+        max_bytes: Integer cumulative budget from three bytes through 4 MiB; divided between
+            two intent verifications and candidate ingestion, including plaintext and rereads.
+    Outputs:
+        dict: Minimal consistency report with restoration/source/execution gates false. Reads
+            and decrypts local archives only; no raw post-state, AWS IO, file writes or unlock.
+            Rejects changed intent, candidate, owner, directory identity, layout and byte limits.
+    """
+    validate_run_id(run_id)
+    for pin in (review_manifest_sha256, source_sha256, recipient_sha256,
+                intent_commitment_sha256, candidate_commitment_sha256):
+        require_sha256(pin)
+    if type(max_bytes) is not int or not 3 <= max_bytes <= MAX_BYTES:
+        raise ValueError("Bounded cumulative candidate ingestion budget required")
+    portion = max_bytes // 3
+    remaining = max_bytes - 2 * portion
+    root_path = private_lock_root(lock_root)
+    descriptors = []
+    try:
+        root = private_directory(root_path)
+        descriptors.append(root)
+        lock = private_directory(BUCKET + ".lock", root)
+        descriptors.append(lock)
+        intent = private_directory("recovery-intent", lock)
+        descriptors.append(intent)
+        archive = private_directory("recovery-closure", lock)
+        descriptors.append(archive)
+        lock_names = {"owner.json", "recovery-intent", "recovery-closure"}
+        names = {"recipient-public.pem", "record-00000.cms", "commitment.json"}
+        if set(os.listdir(lock)) != lock_names or set(os.listdir(archive)) != names:
+            raise ValueError("Exact retained candidate layout required")
+        owner = private_bytes(lock, "owner.json", remaining)
+        remaining -= len(owner)
+        expected_owner = {"version": "sandbox-local-lock-v0.1", "bucket": BUCKET, "run_id": run_id}
+        if canonical_sha256(strict_object(owner)) != canonical_sha256(expected_owner):
+            raise ValueError("Candidate owner differs from retained run")
+        # The original intent must independently verify before any candidate bytes are admitted.
+        before = read_recovery_intent(lock_root, run_id, decrypt_record, review_manifest_sha256,
+            source_sha256, recipient_sha256, intent_commitment_sha256, portion)
+        initial = {}
+        for name in sorted(names):
+            initial[name] = private_bytes(archive, name, remaining)
+            remaining -= len(initial[name])
+        if hashlib.sha256(initial["recipient-public.pem"]).hexdigest() != recipient_sha256:
+            raise ValueError("Candidate recipient differs from independent pin")
+        ciphertext = initial["record-00000.cms"]
+        commitment = strict_object(initial["commitment.json"])
+        if canonical_sha256(commitment) != candidate_commitment_sha256:
+            raise ValueError("Candidate commitment differs from independent pin")
+        require_sha256(commitment.get("candidate_sha256"))
+        expected_commitment = {"version": AUDIT_VERSION, "run_id": run_id,
+            "intent_sha256": before["intent_sha256"], "intent_commitment_sha256": intent_commitment_sha256,
+            "candidate_sha256": commitment["candidate_sha256"],
+            "ciphertext": {"file": "record-00000.cms", "ciphertext_sha256": hashlib.sha256(ciphertext).hexdigest()},
+            "restoration_verified": False, "live_execution_allowed": False}
+        if canonical_sha256(commitment) != canonical_sha256(expected_commitment):
+            raise ValueError("Candidate linkage or closed gates changed")
+        plaintext = decrypt_record(ciphertext)
+        if not isinstance(plaintext, bytes) or len(plaintext) > remaining:
+            raise ValueError("Invalid or excessive candidate plaintext")
+        remaining -= len(plaintext)
+        candidate = strict_object(plaintext)
+        poststate = candidate.get("poststate")
+        if not isinstance(poststate, dict) or set(poststate) != {"metadata", "listings"}:
+            raise ValueError("Complete candidate post-state required")
+        expected = build_restoration_candidate(before["record"], run_id, poststate["metadata"],
+            poststate["listings"], review_manifest_sha256, source_sha256, recipient_sha256)
+        candidate_sha256 = canonical_sha256(candidate)
+        if candidate_sha256 != canonical_sha256(expected) or candidate_sha256 != commitment["candidate_sha256"]:
+            raise ValueError("Decrypted candidate differs from exact retained scope")
+        # Reverify the intent after candidate decryption; a callback cannot silently replace it.
+        after = read_recovery_intent(lock_root, run_id, decrypt_record, review_manifest_sha256,
+            source_sha256, recipient_sha256, intent_commitment_sha256, portion)
+        if canonical_sha256(before) != canonical_sha256(after):
+            raise ValueError("Intent changed during candidate verification")
+        for name in sorted(names):
+            content = private_bytes(archive, name, remaining)
+            remaining -= len(content)
+            if content != initial[name]:
+                raise ValueError("Candidate archive changed during verification")
+        if private_bytes(lock, "owner.json", remaining) != owner:
+            raise ValueError("Candidate owner changed during verification")
+        if set(os.listdir(lock)) != lock_names or set(os.listdir(archive)) != names:
+            raise ValueError("Candidate inventory changed during verification")
+        # All directory descriptors remain anchored across all decryptions and final rereads.
+        for parent, name, opened in ((root, BUCKET + ".lock", lock),
+                (lock, "recovery-intent", intent), (lock, "recovery-closure", archive)):
+            current, original = os.stat(name, dir_fd=parent, follow_symlinks=False), os.fstat(opened)
+            if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino) or current.st_uid != os.getuid() or current.st_mode & 0o077:
+                raise ValueError("Candidate directory changed during verification")
+        current, original = os.stat(root_path, follow_symlinks=False), os.fstat(root)
+        if (current.st_dev, current.st_ino) != (original.st_dev, original.st_ino) or current.st_uid != os.getuid() or current.st_mode & 0o077:
+            raise ValueError("Candidate root changed during verification")
+        return {"version": AUDIT_VERSION, "run_id": run_id, "intent_sha256": before["intent_sha256"],
+                "intent_commitment_sha256": intent_commitment_sha256,
+                "candidate_commitment_sha256": candidate_commitment_sha256, "candidate_sha256": candidate_sha256,
+                "retained_candidate_consistent": True, "lock_held": True, "restoration_verified": False,
+                "source_freshness_verified": False, "live_execution_allowed": False, "research_trials": 0}
+    finally:
+        for descriptor in reversed(descriptors):
+            os.close(descriptor)

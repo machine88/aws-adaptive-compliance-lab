@@ -40,4 +40,4 @@ No verification report archive is created by this entry point; retain approved a
 
 ## Validation boundary
 
-Six portable tests cover preview without callback construction, scope/source mismatch rejection, explicit execution flags, private scope files, secret-safe helper failure and actual bridge/reader composition using a mocked native helper and disposable CMS recipient. They never access the real Keychain or account. A separately reviewed verification using actual retained local artifacts is still pending.
+Six portable tests cover preview without callback construction, scope/source mismatch rejection, explicit execution flags, private scope files, secret-safe helper failure and actual bridge/reader composition using a mocked native helper and disposable CMS recipient. They never access the real Keychain or account. The standalone entry point has not been used on actual retained artifacts. Its shared intent reader and dedicated Keychain helper have now verified an actual intent during the separately approved [supervised preparation](supervised-preparation.md); that pass leaves AWS-restoration and release gates closed.

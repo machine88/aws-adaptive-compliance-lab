@@ -1,6 +1,7 @@
 """Offline private-reader, corruption, resource-limit and restoration-candidate tests."""
 import copy
 import json
+import shutil
 from pathlib import Path
 import subprocess
 import tempfile
@@ -9,7 +10,7 @@ from unittest.mock import Mock, patch
 
 from research.catalog import canonical_sha256
 from research.recovery_intent import retain_recovery_intent
-from research.recovery_review import MAX_BYTES, build_restoration_candidate, read_recovery_intent, retain_restoration_candidate
+from research.recovery_review import MAX_BYTES, build_restoration_candidate, read_recovery_intent, retain_restoration_candidate, read_restoration_candidate
 from research.scenario_lock import acquire_sandbox_lock, release_sandbox_lock
 from tests.crypto_fixtures import synthetic_recipient
 from tests.test_sandbox_emptiness import fixture as listing_fixture
@@ -263,6 +264,11 @@ class RecoveryReviewTests(unittest.TestCase):
         self.assertEqual(canonical_sha256(candidate), receipt["candidate_sha256"])
         self.assertEqual(receipt["intent_commitment_sha256"], self.pin)
         self.assertIs(candidate["restoration_verified"], False)
+        verified = read_restoration_candidate(self.root, RUN, self.decrypt, REVIEW, SOURCE,
+            self.recipient, self.pin, canonical_sha256(receipt))
+        self.assertTrue(verified["retained_candidate_consistent"] and verified["lock_held"])
+        self.assertFalse(verified["restoration_verified"] or verified["live_execution_allowed"])
+        self.assertNotIn("poststate", verified)
         self.assertEqual(self.read()["commitment"], self.commitment)
         with self.assertRaises(ValueError):
             release_sandbox_lock(self.root, RUN)
@@ -285,3 +291,66 @@ class RecoveryReviewTests(unittest.TestCase):
         self.assertEqual(self.read()["commitment"], self.commitment)
         with self.assertRaises(ValueError):
             release_sandbox_lock(self.root, RUN)
+
+
+    def test_candidate_reader_rejects_pins_bytes_and_changes_during_decryption(self):
+        """Reject corrupted, excessive or replaced candidate/intent evidence without releasing exclusion.
+
+        Inputs:
+            self: Test instance retaining disposable CMS intent and candidate archives only.
+        Outputs:
+            None: Asserts closed failure for bad pins, budgets, plaintext, intent and directory changes.
+        """
+        receipt = retain_restoration_candidate(self.root, RUN, self.decrypt, metadata_fixture(), listing_fixture(),
+            REVIEW, SOURCE, self.recipient, self.pin, self.binary, 5)
+        candidate_pin = canonical_sha256(receipt)
+        archive = self.lock / "recovery-closure"
+        ciphertext = (archive / "record-00000.cms").read_bytes()
+        intent_ciphertext = (self.archive / "record-00000.cms").read_bytes()
+        for case in ("pin", "budget", "ciphertext", "plaintext", "oversized", "intent_changed", "directory"):
+            with self.subTest(case=case):
+                calls = 0
+
+                def decrypt_candidate(data):
+                    """Inject one candidate-stage failure while authenticating all other synthetic records.
+
+                    Inputs:
+                        data: Synthetic CMS bytes supplied by the maintained reader.
+                    Outputs:
+                        bytes: Authenticated disposable plaintext or one deliberate malformed payload;
+                            selected cases replace only temporary test files/directories.
+                    """
+                    nonlocal calls
+                    calls += 1
+                    plain = self.decrypt(data)
+                    if calls == 2:
+                        if case == "plaintext":
+                            changed = json.loads(plain)
+                            changed["restoration_verified"] = True
+                            return json.dumps(changed).encode()
+                        if case == "oversized":
+                            return b"x" * MAX_BYTES
+                        if case == "intent_changed":
+                            (self.archive / "record-00000.cms").write_bytes(b"changed-synthetic-intent")
+                        if case == "directory":
+                            archive.rename(self.base / "saved-closure")
+                            shutil.copytree(self.base / "saved-closure", archive)
+                    return plain
+
+                if case == "ciphertext":
+                    (archive / "record-00000.cms").write_bytes(b"changed-synthetic-candidate")
+                try:
+                    with self.assertRaises((ValueError, subprocess.SubprocessError)):
+                        read_restoration_candidate(self.root, RUN, decrypt_candidate, REVIEW, SOURCE,
+                            self.recipient, self.pin, "0" * 64 if case == "pin" else candidate_pin,
+                            max_bytes=32 if case == "budget" else MAX_BYTES)
+                    if case in {"pin", "ciphertext"}:
+                        self.assertEqual(calls, 1)
+                    with self.assertRaises(ValueError):
+                        release_sandbox_lock(self.root, RUN)
+                finally:
+                    if (self.base / "saved-closure").exists():
+                        shutil.rmtree(archive)
+                        (self.base / "saved-closure").rename(archive)
+                    (archive / "record-00000.cms").write_bytes(ciphertext)
+                    (self.archive / "record-00000.cms").write_bytes(intent_ciphertext)

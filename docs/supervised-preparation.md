@@ -1,9 +1,12 @@
 # Supervised development preparation command
 
-Status: implemented for explicit reviewed execution; tested offline with SDK stubs
-and disposable encryption recipients. No live integrated preparation has run.
-The earlier approved observer capture is historical development evidence and
-cannot authorize this new command.
+Status: one separately approved live development preparation completed, after
+renewed sign-in and verification of the expected account/observer identity. It
+retained fifteen encrypted capture records, two journal records and one recovery
+intent; authenticated intent readback and post-run metadata/ciphertext linkage
+checks passed. No AWS configuration changed, no retry ran and no plaintext was
+exported. The lock remains held. Offline tests additionally use SDK stubs and
+disposable recipients. The consumed approval authorizes no further run.
 
 This command connects the previously separate components:
 

@@ -4,7 +4,7 @@
 
 ## Independent inputs
 
-The reader requires the expected run identifier, review-manifest/source/public-recipient fingerprints and the canonical hash of the preparation commitment. These pins must come from independently retained trusted records, not from whichever files the reader is currently inspecting. It also requires a trusted authenticated decryption callback with its own execution/output bounds. The [preview-first local operator](recovery-operator.md) now connects the existing dedicated Keychain callback when explicitly invoked under a reviewed scope. No verification with actual retained artifacts has run in this development step; recovery-key availability is not claimed.
+The reader requires the expected run identifier, review-manifest/source/public-recipient fingerprints and the canonical hash of the preparation commitment. These pins must come from independently retained trusted records, not from whichever files the reader is currently inspecting. It also requires a trusted authenticated decryption callback with its own execution/output bounds. The [preview-first local operator](recovery-operator.md) now connects the existing dedicated Keychain callback when explicitly invoked under a reviewed scope. The separately approved supervised preparation has now verified an actual retained intent through the dedicated helper. This demonstrates that local decryption/readback path for that run; it does not establish AWS restoration credentials or actual restoration.
 
 The default and maximum cumulative byte budget is 4 MiB. It includes owner metadata, certificate, commitment, ciphertext, returned plaintext and post-decryption rereads. Invalid limits fail before ingestion. The caller's decryptor must itself bound memory and execution time; the reader can reject oversized returned plaintext but cannot undo allocation inside an arbitrary callback.
 
@@ -27,3 +27,33 @@ A candidate is not a closure certificate. Neither successful retention nor the e
 Before a live rehearsal, validate the scoped Keychain connection using actual approved local artifacts, implement independent scoped AWS receipts and source clocks, freshness/deadline/credential coverage, actual protection/restoration verification and a reviewed closure/release procedure preserving the original recovery evidence. The lock remains cooperative and single-host; unrelated hosts, console users and unmodified Terraform commands are not excluded by this module. Existing live-run and research approval gates remain intact.
 
 Ten new synthetic cases cover actual CMS roundtrips with a disposable test recipient, external pin/ciphertext mismatches before decryption, duplicate fields, private permissions and links, owner/root changes during decryption, byte limits, weakened restoration metadata, encrypted candidate linkage and synchronization failure. The shared recipient fixture never accesses a real Keychain item, AWS credential or study observation.
+
+
+## Bounded reading of a retained restoration candidate
+
+`read_restoration_candidate` accepts the independently retained run, original
+manifest/source/recipient pins and **both** intent and candidate commitment pins.
+It returns only hashes and a local consistency report, never raw post-state.
+It does not derive trusted pins from the archive being inspected.
+
+The reader verifies the original intent before and after candidate ingestion.
+It checks the candidate's exact archive/commitment, ciphertext receipt, recipient,
+intent linkage and full reconstructed protected post-state. Modified gates or
+extra fields are rejected. Directory descriptors stay anchored across callbacks;
+owner/inventory/content rereads and root/lock/intent/candidate identity checks
+reject replacement and partial artifacts.
+
+The cumulative default/maximum file-plus-plaintext budget is 4 MiB. It is divided
+into three fixed portions: the first intent read, candidate ingestion/rereads,
+and the second intent read. Unused capacity is not transferred between portions.
+A large artifact can therefore fail its portion even if other portions are small;
+the reader never truncates data to force acceptance. The caller must still bound
+decryptor runtime/output allocation; this API is not a process supervisor.
+
+`retained_candidate_consistent=true` leaves `restoration_verified=false`,
+`source_freshness_verified=false` and `live_execution_allowed=false`. No planner
+transition or lock release is added. Only synthetic recipients/post-states have
+exercised this new reader; no actual restoration or release has occurred.
+Regression coverage extends the existing encrypted candidate roundtrip and adds
+bad external pins, budget exhaustion, changed ciphertext, altered/oversized
+plaintext, intent replacement and candidate-directory substitution.
