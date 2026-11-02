@@ -30,3 +30,10 @@ The [sandbox observer](sandbox-observer.md) now has its own approved and deploye
 One separately approved [development observer capture](sandbox-verification.md) has now completed, with fifteen encrypted capture records and two operator journal records. Bounded local verification through the trusted recipient/helper passed the approved scope, receipt-chain and administrative pre-state checks. Retained responses showed expected protections and complete empty current-object, version/deletion-marker and unfinished-upload listings at their individual receipt times. No plaintext evidence was exported, and the capture was not repeated.
 
 This advances the engineering access/acquisition boundary. Freshness, simultaneous-state/concurrency proof, trigger attribution, ML readiness and formal-trial authorization remain open. The new [callback-based locked preparation](observer-recovery-preparation.md) now joins a new scoped observation, anchored local lock, local timing checks and encrypted intent in offline tests. A reviewed live adapter, independent source/clock validation and controlled restoration/release remain necessary before rehearsal. All eight work packages remain open; pilot/confirmatory trials and study-model training have not started.
+
+
+The next live-preparation prerequisite now supports guarded nested process groups:
+a future outer supervisor can keep the observer within its own timeout boundary.
+Real local process tests verify outer-timeout termination of a nested descendant
+and reject use from an ordinary application process. This is offline engineering
+work, not a completed live adapter or approval for another AWS capture.

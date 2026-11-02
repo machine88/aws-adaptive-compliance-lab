@@ -109,21 +109,28 @@ def validate_sandbox_scope(scope, approved_scope_sha256):
         raise ValueError("Local operator bindings changed")
 
 
-def run_sandbox_operator(scope, approved_scope_sha256):
+def run_sandbox_operator(scope, approved_scope_sha256, *, inherit_supervisor_group=False):
     """Reserve one private run and supervise its silent read-only worker after review.
 
     Inputs:
         scope: Exact operator scope already explicitly approved for live development collection.
         approved_scope_sha256: Independently retained scope hash; not a substitute for approval.
+        inherit_supervisor_group: Explicit nested mode for an already isolated outer supervisor;
+            default retains the standalone observer process-group behavior.
     Outputs:
         dict: Minimal worker status, closed scenario-execution gate and zero research trials.
             Creates an exclusive private run with encrypted operator journal and capture output.
-            A worker timeout kills/reaps its process group through the existing supervisor;
+            A standalone timeout kills/reaps the worker group. In nested mode only the immediate
+            child is killed/reaped locally; the outer supervisor owns group-wide termination;
             partial output is preserved. Local preparation/fsync and process reaping are not
             subject to an absolute end-to-end deadline. No automatic retry or lock release.
     """
     if os.name != "posix":
         raise ValueError("POSIX process supervision required")
+    if type(inherit_supervisor_group) is not bool:
+        raise ValueError("Explicit boolean process-group mode required")
+    if inherit_supervisor_group and (os.getsid(0) != os.getpid() or os.getpgrp() != os.getpid()):
+        raise ValueError("Nested observer requires an isolated session/group leader")
     validate_sandbox_scope(scope, approved_scope_sha256)
     root = Path(scope["output_root"])
     root.mkdir(mode=0o700)
@@ -131,8 +138,10 @@ def run_sandbox_operator(scope, approved_scope_sha256):
     journal = EncryptedArchive(root / "journal", scope["certificate"], scope["openssl"], timeout_seconds=5)
     journal.write({"kind": "sandbox_operator_scope", "scope": scope, "scope_sha256": approved_scope_sha256})
     descriptor = {"scope": scope, "approved_scope_sha256": approved_scope_sha256}
-    status = bounded_worker([scope["python_executable"], "-I", str(ROOT / "scripts/sandbox_capture_worker.py")],
-                            descriptor, scope["worker_timeout_seconds"])
+    command = [scope["python_executable"], "-I", str(ROOT / "scripts/sandbox_capture_worker.py")]
+    # An outer preparation supervisor must own all descendants rather than detach this worker.
+    options = {"inherit_supervisor_group": True} if inherit_supervisor_group else {}
+    status = bounded_worker(command, descriptor, scope["worker_timeout_seconds"], **options)
     # Worker exit success is not independent authentication of its encrypted completion record.
     fingerprint = snapshot_fingerprint(root / "capture", scope["capture"]["recipient_sha256"]) if status == "success" else None
     journal.write({"kind": "sandbox_operator_status", "worker_status": status,

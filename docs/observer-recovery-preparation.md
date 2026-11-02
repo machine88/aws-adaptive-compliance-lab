@@ -47,3 +47,23 @@ The manifest's private-frame hash includes identity and ordered receipts. The in
 Three focused test methods compose the real operator, worker, SDK stubs, CMS archive reader/writer and existing recovery reader using disposable recipients. They cover successful linkage, existing-output/binding/lock admission failures, callback errors, deadline/clock rollback or jumps, out-of-window receipts, lock replacement/owner/permission changes and persistence failure. They verify one callback, held exclusion and no implicit release/retry. No real AWS profile, Keychain item, historical capture or operational lock is used.
 
 Current operator approval does not automatically authorize this new integrated flow. A new reviewed scope and live adapter are still needed. Independent source/clock validation, recovery credentials, restoration/closure proof, safe release, the change/observe/restore driver, monitoring validation and the separately approved rehearsal remain open. Pilot and confirmatory data stay separate, and research trials remain zero.
+
+
+## Nested process supervision prerequisite
+
+The shared worker supervisor and observer operator now offer an explicit
+`inherit_supervisor_group=True` mode for a future outer preparation worker.
+It is accepted only when the invoking process is already both its own session
+leader and process-group leader, before reserving observer output. Standalone
+calls retain their existing separate-session behavior.
+
+This prevents a nested observer from detaching into a new session beyond the
+outer timeout's reach. In nested mode an inner timeout kills/reaps its immediate
+child; the outer supervisor remains responsible for terminating the entire
+shared group. The mode does not itself create an outer supervisor, stop arbitrary
+descendants that deliberately detach, or impose a deadline on filesystem sync.
+No live preparation command has been added yet.
+
+Offline regression tests launch a real isolated outer supervisor and nested
+sleeping child, then verify that the outer deadline stops the descendant. They
+also reject nested mode outside an isolated leader before spawning a process.
