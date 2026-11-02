@@ -149,7 +149,9 @@ Before live integration, independently validate the lock/pre-state, source clock
 and freshness, remaining credential coverage, process supervision, restoration
 readback, crash/network recovery and evidence-preserving mutating-run release.
 Requested session duration is not proof of remaining lifetime; that gate remains
-false. Attempt bounds are per writer instance, not IAM rate limits across a
+false. The [offline session timing evaluator](writer-session-budget.md) now checks
+supplied expiration and paired clocks against a fixed conservative budget; it
+does not authenticate provider evidence or promote that gate. Attempt bounds are per writer instance, not IAM rate limits across a
 restart. No unreviewed new instance may reset a consumed mutation attempt.
 
 The offline cycle stays synthetic-only; this transport is not wired into it to
