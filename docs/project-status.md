@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and approved, deployed and independently verified bounded writer access | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and approved, deployed and independently verified bounded writer access; offline session timing budget evaluator | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -81,3 +81,13 @@ was performed. These access checks are administrative evidence only. Next:
 integrate live admission, independent freshness/credential checks and supervised
 recovery/closure before requesting a separately reviewed rehearsal. All eight
 work packages remain open; pilot and confirmatory trials remain zero.
+
+
+The [session timing budget evaluator](writer-session-budget.md) now rejects stale,
+replayed, inconsistent or insufficient supplied session metadata before a future
+live admission decision. It reserves the full transport lifetime, extra recovery
+time and clock allowance. This is offline arithmetic only: no provider evidence
+is authenticated and all credential/live/restoration gates remain false. Next is
+a trusted adapter binding the actual request session to retained expiration and
+same-process clocks, followed by observer/supervision/closure integration. No new
+AWS operation, capture or research trial occurred in this implementation step.
