@@ -93,7 +93,9 @@ limits and post-change journal outage. They never contact AWS or use the real
 recipient. The fixed 1,800-second contract preserves proposal requirement M13;
 synthetic completion is not a validated research timing result.
 
-Next: design/generate bounded mutation and recovery permissions, validate live
+The [disabled SDK transport and generated access root](sandbox-writer.md) are now
+implemented separately and tested with SDK stubs; they have not been deployed or
+connected to this synthetic executor. Next: review the saved access plan, validate live
 credentials/fresh source receipts and process recovery, integrate the lock and
 both monitor collectors, then review the exact live rehearsal plan. No role,
 policy, monitoring activation or cloud mutation is authorized by merging this code.

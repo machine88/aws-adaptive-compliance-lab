@@ -1,0 +1,16 @@
+{
+  "version": "writer-policy-analysis-v0.1",
+  "tool": "iam-policy-autopilot",
+  "tool_version": "0.3.0",
+  "account": "653464153304",
+  "region": "us-east-2",
+  "source_sha256": {
+    "research/sandbox_writer.py": "55ecfe10ea0e1c6099ee3779ce0dd50eacef4424eda7b3005aafbb16d90b72ba"
+  },
+  "terraform_context": "infra/sandbox",
+  "generated_policy_canonical_sha256": "1a685fe50774da61a30a7991f5f85d65aa0386a549410c964739b7ecb72b57aa",
+  "generated_policy_standalone_approved": false,
+  "mandatory_boundary": "infra/writer/main.tf",
+  "deployable_saved_plan": false,
+  "aws_applied": false
+}
