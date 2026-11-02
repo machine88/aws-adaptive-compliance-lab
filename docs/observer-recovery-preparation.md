@@ -1,6 +1,6 @@
 # Locked observer-to-recovery preparation
 
-Status: callback-based integration implemented and tested offline. **No live instance of this preparation flow, new capture or mutation has run.** The earlier approved observer pass remains historical development evidence. There is no built-in live adapter or mutation command in this module.
+Status: callback-based integration implemented and tested offline. **No live instance of this preparation flow, new capture or mutation has run.** The earlier approved observer pass remains historical development evidence. The separate [supervised preparation command](supervised-preparation.md) now supplies a reviewed live adapter; this callback module itself has no mutation command.
 
 `research/observer_recovery_preparation.py` connects the existing local exclusion lock, observer operator, bounded archive reader and encrypted recovery-intent writer. This is preparation for a future reviewed development rehearsal; it grants no research or scenario-execution authority.
 
@@ -46,7 +46,7 @@ The manifest's private-frame hash includes identity and ordered receipts. The in
 
 Three focused test methods compose the real operator, worker, SDK stubs, CMS archive reader/writer and existing recovery reader using disposable recipients. They cover successful linkage, existing-output/binding/lock admission failures, callback errors, deadline/clock rollback or jumps, out-of-window receipts, lock replacement/owner/permission changes and persistence failure. They verify one callback, held exclusion and no implicit release/retry. No real AWS profile, Keychain item, historical capture or operational lock is used.
 
-Current operator approval does not automatically authorize this new integrated flow. A new reviewed scope and live adapter are still needed. Independent source/clock validation, recovery credentials, restoration/closure proof, safe release, the change/observe/restore driver, monitoring validation and the separately approved rehearsal remain open. Pilot and confirmatory data stay separate, and research trials remain zero.
+Current operator approval does not automatically authorize this new integrated flow. A new reviewed scope and explicit approval of the supervised command are still needed. Independent source/clock validation, recovery credentials, restoration/closure proof, safe release, the change/observe/restore driver, monitoring validation and the separately approved rehearsal remain open. Pilot and confirmatory data stay separate, and research trials remain zero.
 
 
 ## Nested process supervision prerequisite
@@ -62,7 +62,7 @@ outer timeout's reach. In nested mode an inner timeout kills/reaps its immediate
 child; the outer supervisor remains responsible for terminating the entire
 shared group. The mode does not itself create an outer supervisor, stop arbitrary
 descendants that deliberately detach, or impose a deadline on filesystem sync.
-No live preparation command has been added yet.
+The separate supervised preparation command now uses this nested mode; live execution still needs its own approval.
 
 Offline regression tests launch a real isolated outer supervisor and nested
 sleeping child, then verify that the outer deadline stops the descendant. They

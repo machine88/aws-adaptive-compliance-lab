@@ -176,7 +176,7 @@ def worker_environment():
     return env
 
 
-def bounded_worker(command, descriptor, timeout_seconds, *, inherit_supervisor_group=False):
+def bounded_worker(command, descriptor, timeout_seconds, *, inherit_supervisor_group=False, terminate_group_on_exit=False):
     """Run a silent isolated worker and kill its process group on timeout or cancellation.
 
     Inputs:
@@ -185,12 +185,16 @@ def bounded_worker(command, descriptor, timeout_seconds, *, inherit_supervisor_g
         timeout_seconds: Reviewed bounded subprocess runtime.
         inherit_supervisor_group: Keep a nested child in this process group only when this
             caller is already its isolated session/group leader; default creates a new session.
+        terminate_group_on_exit: Kill remaining members of a new worker group even after normal
+            worker exit; required for the outer preparation supervisor, incompatible with nesting.
     Outputs:
         str: success, failed, fatal or timeout; reaps the child and discards stdout/stderr.
             Default cancellation kills the worker group then propagates. Nested mode kills only
             its immediate child; the outer supervisor owns group-wide termination. No raw output
             is retained. This mode never targets the invoking application's process group.
     """
+    if type(terminate_group_on_exit) is not bool or (terminate_group_on_exit and inherit_supervisor_group):
+        raise ValueError("Group cleanup requires an explicit standalone supervisor mode")
     if type(inherit_supervisor_group) is not bool:
         raise ValueError("Explicit boolean process-group mode required")
     if inherit_supervisor_group and (os.getsid(0) != os.getpid() or os.getpgrp() != os.getpid()):
@@ -211,6 +215,12 @@ def bounded_worker(command, descriptor, timeout_seconds, *, inherit_supervisor_g
         if isinstance(error, subprocess.TimeoutExpired):
             return "timeout"
         raise
+    if terminate_group_on_exit:
+        # A failed helper may leave descendants even when the immediate worker has exited.
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
     return "success" if process.returncode == 0 else "fatal" if process.returncode == 2 else "failed"
 
 

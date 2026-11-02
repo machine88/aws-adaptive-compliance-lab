@@ -42,3 +42,5 @@ These documents describe components and review requirements. They do not grant l
 [Phase 2 review](phase2-deployment-review.md), [bounded access review](sandbox-access-review.md), [evidence-reader review](evidence-reader-review.md), [state migration](state-migration-completed.md) and [staged activation](staged-activation.md) describe their own historical scopes. Do not treat an old approved plan as permission for a new action.
 
 Some historical documents use the original dissertation project name. Existing AWS identifiers and private retained evidence keep their original names for traceability. Raw approvals, state, account responses, captures and the source proposal remain private.
+
+- [Supervised preparation command](supervised-preparation.md): reviewed read-only observation, persistent lock, encrypted intent readback and process deadline.
