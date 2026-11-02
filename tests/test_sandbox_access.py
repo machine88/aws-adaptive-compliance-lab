@@ -68,25 +68,29 @@ class SandboxAccessTests(unittest.TestCase):
         self.assertEqual(grant['Resource'], ['arn:aws:s3:::dissertation-sandbox-653464153304-us-east-2-s3-01'])
 
 
-    def test_observer_generated_policy_matches_source_and_provenance(self):
-        """Reject stale observer source bindings or changed unedited generated policy.
+    def test_generated_observer_and_writer_policies_match_source_and_provenance(self):
+        """Reject stale runtime source bindings or edited generated observer/writer baselines.
 
         Inputs:
-            self: Test instance reading maintained source and policy provenance only.
+            self: Test instance reading maintained source and generation metadata only.
         Outputs:
-            None: Asserts exact source inputs, hashes and closed deployment/standalone gates.
+            None: Asserts exact source sets/content, policy hashes and closed standalone/apply gates.
                 Performs no IAM simulation, credential lookup or AWS call.
         """
-        metadata = json.loads((ROOT / "protocol/observer-policy-generation.json").read_text())
-        generated = json.loads((ROOT / "infra/observer/generated-observer-policy.json").read_text())
-        self.assertEqual(set(metadata["source_sha256"]), {"research/sandbox_capture.py", "scripts/sandbox_capture_worker.py"})
-        for path, expected in metadata["source_sha256"].items():
-            self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected)
-        digest = hashlib.sha256(json.dumps(generated, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
-        self.assertEqual(digest, metadata["generated_policy_canonical_sha256"])
-        self.assertFalse(metadata["generated_policy_standalone_approved"])
-        self.assertFalse(metadata["deployable_saved_plan"])
-        self.assertFalse(metadata["aws_applied"])
+        sources = {"observer": {"research/sandbox_capture.py", "scripts/sandbox_capture_worker.py"},
+                   "writer": {"research/sandbox_writer.py"}}
+        for name, expected_sources in sources.items():
+            with self.subTest(role=name):
+                metadata = json.loads((ROOT / f"protocol/{name}-policy-generation.json").read_text())
+                generated = json.loads((ROOT / f"infra/{name}/generated-{name}-policy.json").read_text())
+                self.assertEqual(set(metadata["source_sha256"]), expected_sources)
+                for path, expected in metadata["source_sha256"].items():
+                    self.assertEqual(hashlib.sha256((ROOT / path).read_bytes()).hexdigest(), expected)
+                digest = hashlib.sha256(json.dumps(generated, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+                self.assertEqual(digest, metadata["generated_policy_canonical_sha256"])
+                self.assertFalse(metadata["generated_policy_standalone_approved"])
+                self.assertFalse(metadata["deployable_saved_plan"])
+                self.assertFalse(metadata["aws_applied"])
 
 
 if __name__ == '__main__':

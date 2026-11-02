@@ -71,3 +71,8 @@ jobs:
           terraform -chdir=infra/observer init -backend=false -input=false
           terraform -chdir=infra/observer validate
           terraform -chdir=infra/observer test
+
+          # Input: disabled versioning writer and mock identities. Output: isolated write ceiling checks.
+          terraform -chdir=infra/writer init -backend=false -input=false
+          terraform -chdir=infra/writer validate
+          terraform -chdir=infra/writer test

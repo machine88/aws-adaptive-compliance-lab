@@ -8,7 +8,7 @@ These packages are not equal in size, strictly sequential, or a percentage-compl
 
 | Work package | Built or established | Needed to close it |
 | --- | --- | --- |
-| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
+| 1. Safe experiment runner | Sandbox; pre-state checks; lock; encrypted intent; bounded recovery reader; encrypted restoration candidates; preview-first Keychain operator; offline observer request/receipt adapter; encrypted capture engine; preview-first supervised observer operator; deployed and independently verified bounded observer access; verified short-lived profile; completed approved single-pass capture and bounded offline verification; offline locked observer-to-intent integration; completed approved supervised preparation with encrypted intent readback; offline bounded restoration-candidate reader; completed separately approved read-only archival retirement; offline change/observe/restore executor; disabled SDK writer and proposed bounded access root | Independent source/clock checks; live restoration/closure and release verification; integrated change/observe/restore driver; approved rehearsal |
 | 2. Validated monitoring and telemetry | CloudTrail logging and service-reported delivery; encrypted development collection | Reviewed Config/CSPM activation; applicable control validation; attribution, availability, freshness and completeness checks |
 | 3. Independent scenario catalog and protocol | Twelve draft S3 cases; separate expected answers and design checks | Six-service coverage; authoritative mappings; viable independent learning groups; review and protocol freeze |
 | 4. Study ML pipeline | Executable Isolation Forest, bounded adaptation, mapping and synthetic paired controller | Valid real features, training/anchor inputs, held-out partitions and retained study-model provenance |
@@ -64,5 +64,16 @@ a run that attempted a scenario write or substitute for verified restoration.
 The [offline change/observe/restore driver](versioning-cycle.md) now executes the
 recovery table against trusted synthetic callbacks, with durable pre-change
 journaling, one fixed observation cutoff and bounded restoration. Real disposable
-CMS retention and injected error/cancellation tests pass. There is no live SDK
-write adapter, no actual restoration/rehearsal and no research trial.
+CMS retention and injected error/cancellation tests pass. The new disabled SDK transport is separate from that synthetic executor; no
+actual restoration/rehearsal or research trial has run.
+
+
+The [versioning writer transport and proposed access](sandbox-writer.md) now have
+SDK-stub/CMS validation, generated-policy provenance and a disabled Terraform
+root with its own state key. Actual AWS identity/collision reads confirmed the
+expected non-root user and absent proposed role/policies; both candidate policy
+documents passed validation and 16 custom-policy decisions matched the bounded
+ceiling. These are administrative checks only. No grant, writer profile, scenario
+write or monitoring activation has occurred. Next: complete the private saved
+access-plan review, obtain deployment approval, then validate actual access before
+any separately approved live rehearsal.

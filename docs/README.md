@@ -48,3 +48,5 @@ Some historical documents use the original dissertation project name. Existing A
 - [Reviewed read-only retirement](readonly-retirement.md): preserve a completed preparation lock intact before allowing new cooperative acquisition.
 
 - [Offline change/observe/restore driver](versioning-cycle.md): encrypted action ordering, fixed cutoff and bounded synthetic recovery before a live adapter.
+
+- [Versioning transport and proposed writer access](sandbox-writer.md): fixed SDK requests, encrypted receipts, generated permissions and deployment/rehearsal gates.

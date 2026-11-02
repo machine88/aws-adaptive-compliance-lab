@@ -10,6 +10,7 @@ Terraform defines AWS Adaptive Compliance Lab's research foundation. The checked
 | `access/` | Bounded deployment roles, permissions boundaries and sandbox access |
 | `baseline/` | Telemetry S3, CloudTrail, AWS Config, Security Hub CSPM and budget notifications |
 | `reader/` | Scoped read-only evidence access |
+| `writer/` | Disabled-by-default fixed-bucket versioning role, generated policy and mandatory boundary |
 | `observer/` | Disabled-by-default sandbox observation role, generated baseline and mandatory boundary |
 | `sandbox/` | Dedicated private, encrypted, versioned development S3 bucket |
 
@@ -22,7 +23,7 @@ Use Terraform **1.15.0** and the committed provider lockfiles. From the reposito
 ```sh
 # Check formatting, then validate and test each root without remote state access.
 terraform fmt -check -recursive infra
-for root in bootstrap access baseline reader sandbox observer; do
+for root in bootstrap access baseline reader sandbox observer writer; do
   terraform -chdir="infra/$root" init -backend=false -input=false || exit 1
   terraform -chdir="infra/$root" validate || exit 1
   terraform -chdir="infra/$root" test || exit 1
@@ -44,3 +45,5 @@ Verify the actual non-root identity, account and region. Review the exact target
 Creation and activation defaults are off in source; those defaults are not pause switches for deployed resources. Preserve explicit approved active inputs in later plans. Do not rename or recreate state buckets, roles or telemetry resources just to match the new project branding.
 
 Start with the [deployment review](../docs/phase2-deployment-review.md), [sandbox review](../docs/scenario-sandbox-review.md), [bounded access review](../docs/sandbox-access-review.md) and [roadmap](../docs/implementation-plan.md). Cloud changes, captures and scenario runs have separate approval gates.
+
+The proposed [versioning writer](../docs/sandbox-writer.md) is not deployed. Its generated policy requires the mandatory exact-target boundary, separate protected state and an explicitly approved saved access plan. Role deployment never authorizes a scenario change.
