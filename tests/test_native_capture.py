@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import Mock, patch
 from research.archive_ingestion import verify_archive, read_archive_records
-from research.native_verification import verify_native_run, verify_journal_sequence
+from research.native_verification import audit_native_clocks, verify_native_run, verify_journal_sequence
 from research.aws_reader import ACCOUNT, BUCKETS, READER_PREFIX, EncryptedArchive, read_plan
 from research.catalog import canonical_sha256
 from research.native_capture import (NativeSnapshotCallbacks, native_scope, validate_native_scope,
@@ -22,6 +22,37 @@ from research.native_capture import run_native_capture
 from research.contracts import PROPOSAL_SHA256
 from research.prospective_runner import CollectorAbort
 from scripts.prospective_snapshot_worker import main as worker_main, reader_session, PROFILE
+
+
+class NativeClockAuditTests(unittest.TestCase):
+    """Protect the distinction between provider observations and timely collection."""
+
+    def test_clock_audit_retains_rejected_rows_and_endpoint_receipt(self):
+        """Keep stale, late and clock-deficient evidence visible beside an endpoint receipt.
+
+        Inputs:
+            No arguments. Uses synthetic Config and CSPM timestamps at window boundaries.
+        Outputs:
+            None. Checks dispositions without mutating rows or inferring CSPM detection time.
+        """
+        anchor = "2026-01-01T00:00:00Z"
+        cutoff = "2026-01-01T00:30:00Z"
+        config = {"source": "config", "target": "S3.5", "status": "NON_COMPLIANT",
+                  "evidence_sha256": "a" * 64, "source_observed_at": anchor,
+                  "detected_at": "2026-01-01T00:00:01Z", "recorded_at": cutoff}
+        cspm = {"source": "securityhub_cspm", "target": "S3.5", "status": "FAILED",
+                "evidence_sha256": "b" * 64, "source_observed_at": anchor,
+                "provider_updated_at": "2026-01-01T00:00:02Z", "recorded_at": cutoff}
+        rows = [config, cspm, {**config, "source_observed_at": "2025-12-31T23:59:59Z"},
+                {**cspm, "recorded_at": "2026-01-01T00:30:01Z"},
+                {**cspm, "source_observed_at": None}, {**cspm, "provider_updated_at": "no clock"},
+                {**config, "detected_at": "2026-01-01T00:30:01Z"}]
+        audit = audit_native_clocks(rows, anchor, cutoff)
+        self.assertEqual([row["clock_disposition"] for row in audit],
+                         ["within_window", "within_window", "source_before_window", "late_receipt",
+                          "missing_clock", "invalid_clock", "inconsistent_clocks"])
+        self.assertEqual([{k: v for k, v in row.items() if k != "clock_disposition"} for row in audit], rows)
+        self.assertNotIn("detected_at", audit[1])
 
 
 class NativeTests(unittest.TestCase):

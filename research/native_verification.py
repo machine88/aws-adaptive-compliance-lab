@@ -145,6 +145,54 @@ def verify_journal_sequence(records, receipts, plan, report):
     return failures
 
 
+def audit_native_clocks(statuses, anchor_at, cutoff_at):
+    """Classify source rows by their recorded clocks without producing a baseline decision.
+
+    Inputs:
+        statuses: Scoped source_statuses rows returned by the snapshot normalizer.
+        anchor_at: Declared development window start.
+        cutoff_at: End of the observation window, inclusive for receipt times.
+    Outputs:
+        list[dict]: Original scoped rows with a clock disposition. Performs no AWS
+            calls, writes, fusion, or first-detection inference.
+    """
+    start = utc_timestamp(anchor_at)
+    end = utc_timestamp(cutoff_at)
+    if end <= start:
+        raise ValueError("Native clock audit requires a positive window")
+
+    audited = []
+    for row in statuses:
+        require_sha256(row["evidence_sha256"])
+        if row["source"] == "config":
+            source_clock = "detected_at"
+        elif row["source"] == "securityhub_cspm":
+            source_clock = "provider_updated_at"
+        else:
+            raise ValueError("Unsupported native source")
+
+        # CSPM update time is a provider clock. It does not establish first detection.
+        clocks = [row.get(field) for field in ("source_observed_at", source_clock, "recorded_at")]
+        if any(value is None for value in clocks):
+            disposition = "missing_clock"
+        else:
+            try:
+                observed, provider, received = (utc_timestamp(value) for value in clocks)
+            except (TypeError, ValueError):
+                disposition = "invalid_clock"
+            else:
+                if not observed <= provider <= received:
+                    disposition = "inconsistent_clocks"
+                elif observed < start:
+                    disposition = "source_before_window"
+                elif received > end:
+                    disposition = "late_receipt"
+                else:
+                    disposition = "within_window"
+        audited.append({**row, "clock_disposition": disposition})
+    return audited
+
+
 def verify_native_run(root, decrypt_record, recipient_sha256, native_report_sha256, plan, scope):
     """Verify a completed native journal and every successful source snapshot without cloud access.
 
@@ -236,8 +284,11 @@ def verify_native_run(root, decrypt_record, recipient_sha256, native_report_sha2
             if pages > (scope["max_pages"] if request["paginated"] else 1) or items > scope["max_items"]:
                 raise ValueError("Snapshot source exceeds reviewed page/item caps")
             queries[key] = pages, items
+        normalized = verified["normalized"]
+        clock_audit = audit_native_clocks(normalized["source_statuses"], plan["sampling"]["trigger_at"],
+                                          report["sampling_audit"]["cutoff_at"])
         verified_sources.append({"sample_id": receipt["sample_id"], "archive_sha256": verified["archive_sha256"],
-                                 "normalized": verified["normalized"]})
+                                 "normalized": normalized, "source_clock_audit": clock_audit})
     return {"version": "development-native-verification-v0.1", "phase": "development",
             "plan_sha256": plan_hash, "scope_sha256": scope_hash, "native_report_sha256": native_report_sha256,
             "sampling_audit": report["sampling_audit"], "verified_snapshots": verified_sources,

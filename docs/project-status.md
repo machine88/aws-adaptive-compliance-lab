@@ -13,7 +13,7 @@ No AI-versus-native comparison was performed. No study model was trained, and pi
 | Work package | Progress | Remaining work |
 | --- | --- | --- |
 | Safe experiment runner | One development cycle verified | Closure review, broader integration and instrument validation |
-| Monitoring and telemetry | Collection components implemented | Validate paired monitoring, attribution and completeness |
+| Monitoring and telemetry | Collection components and offline native clock audit implemented | Validate paired monitoring, attribution and completeness |
 | Scenario catalog and protocol | Draft S3 cases and separate expected answers | Six-service coverage, viable learning groups, independent review and freeze |
 | Study ML pipeline | Isolation Forest, bounded adaptation and deterministic mapping tested with synthetic inputs | Validate real features, partitions and study-model provenance |
 | Statistical design | Proposal requirements traced | R power simulations, justified sample size and analysis verification |
@@ -22,3 +22,5 @@ No AI-versus-native comparison was performed. No study model was trained, and pi
 | Reporting | Verified development outcome available | Review progress paper; later report comparative findings and limitations |
 
 The next step is a concrete reviewed plan for monitoring validation, alongside catalog, feature and statistical-design work. These packages are unequal and are not a percentage-complete estimate. No final sample size or defensible completion date is established yet. See the [development result](development-versioning-experiment.md) and [proposal traceability](proposal-traceability.md).
+
+The native archive verifier now screens scoped Config and CSPM rows against the declared development window. It preserves pre-window evidence, late receipts, and missing or inconsistent clocks with their dispositions. This is a timing diagnostic. Trigger verification, causal attribution, baseline fusion, and live paired validation remain open.
